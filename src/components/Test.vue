@@ -16,17 +16,17 @@
     },
     data () {
       return {
-        jojoItems: ['aha', 'nono', 'nana'],
+        jojoItems: ['aha', 'nono', 'nanaaaallllddda'],
         bela: null
       }
     },
     created () {
-      console.info('test component created')
+      console.info('test component created ... béla...')
     }
   }
 </script>
 <style lang="less">
-  @color-var: #0d3ddd;
+  @color-var: #0d1ddd;
   .test {
     &__elek {
       color: @color-var;
