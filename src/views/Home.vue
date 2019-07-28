@@ -8,8 +8,6 @@
 <script>
 // @ is an alias to /src
 import HelloWorld from '@/components/HelloWorld.vue'
-import ImageList from '@/components/masonryList'
-import ImageCard from '@/components/ImageCard.vue'
 import Gallery from '@/components/Gallery.vue'
 import Header from '@/components/Header.vue'
 

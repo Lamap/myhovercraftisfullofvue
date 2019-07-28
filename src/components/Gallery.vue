@@ -1,6 +1,22 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <div class="hvr-gallery">
-    <md-autocomplete v-model="selectedTags" :md-options="existingTags" />
+    <div class="hvr-gallery__search">
+      <vue-tags-input
+          class="hvr-gallery__search-input"
+          v-model="tag"
+          :tags="selectedTags"
+          :autocomplete-items="filteredTags"
+          :disabled="showOnlyNonTagged"
+          placeholder="Add search tag"
+          @tags-changed="newTags => selectedTags = newTags"
+      />
+      <span class="hvr-gallery__non-tagged-filter">
+        only non-tagged
+        <span class="hvr-gallery__non-tagged-filter-checkbox">
+          <md-checkbox v-model="showOnlyNonTagged"></md-checkbox>
+        </span>
+      </span>
+    </div>
     <div class="hvr-gallery__bulk-actions" v-if="selectedItems.length">
       <md-button class="md-icon-button">
         <md-icon class="hvr-icon-blue">public</md-icon>
@@ -29,51 +45,64 @@
   </div>
 </template>
 <script>
-import MasonryList from '@/components/masonryList'
-import ImageCard from '@/components/ImageCard.vue'
+import MasonryList from '@/components/masonryList';
+import ImageCard from '@/components/ImageCard.vue';
+import VueTagsInput from '@johmun/vue-tags-input';
 export default {
   components: {
     MasonryList,
-    ImageCard
+    ImageCard,
+    VueTagsInput
   },
   created () {
     console.log('gallery-created');
   },
   data () {
     return {
+      showOnlyNonTagged: false,
+      tag: '',
       items: [
         {
           name: 'jenő',
           id: 10,
           src: 'https://firebasestorage.googleapis.com/v0/b/myhovecraft.appspot.com/o/hvr%2Fspg-1558102404135?alt=media&token=b6f0f567-e5dc-466e-9d33-6149da491f77',
-          isSelected: true
+          isPublic: false
         },
         {
           name: 'béla',
           id: 20,
           src: 'https://www.fillmurray.com/200/200',
-          isSelected: true
+          isPublic: true
         },
         {
           name: 'hurka',
           id: 30,
           src: 'https://www.fillmurray.com/300/400',
-          isSelected: true
+          isPublic: false
         },
         {
           name: 'gyurka',
           id: 40,
           src: 'https://www.fillmurray.com/300/500',
-          isSelected: true
+          isPublic: false
         }
       ],
       existingTags: [
-        'aha',
-          'jojo',
-          'nana',
-          'nene'
+        {
+          text: 'abc'
+        },
+        {
+          text: 'abcd'
+        },
+        {
+          text: 'abcde'
+        }
       ],
-      selectedTags: null
+      selectedTags: [
+        {
+          text: 'abc'
+        }
+      ]
     };
   },
   computed: {
@@ -81,7 +110,25 @@ export default {
       const selection = this.items.filter(item => item.isSelected);
       console.log('selection changed', selection);
       return selection;
+    },
+    filteredTags () {
+      return this.existingTags.filter(tag => tag.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1);
     }
   }
 }
 </script>
+<style lang="less">
+  .hvr-gallery {
+    &__search {
+      display: flex;
+    }
+    &__non-tagged-filter {
+      display: flex;
+      align-items: center;
+      margin-left: 1rem;
+    }
+    &__non-tagged-filter-checkbox {
+      margin-left: 0.5rem;
+    }
+  }
+</style>

@@ -4,8 +4,8 @@
     <img class="hvr-imagecard__image" :src="imageData.src" />
     <div class="hvr-imagecard__tags">tags...</div>
     <div class="hvr-imagecard__actions">
-      <md-button class="md-icon-button">
-        <md-icon class="hvr-icon-blue">public</md-icon>
+      <md-button class="md-icon-button" @click="togglePublicity">
+        <md-icon class="hvr-icon-blue" :class="{'hvr-icon-blue--inactive': !imageData.isPublic}">public</md-icon>
       </md-button>
       <md-button class="md-icon-button">
         <md-icon class="hvr-icon-blue">share</md-icon>
@@ -46,6 +46,12 @@ export default {
   },
   created () {
     console.log('imageCard created');
+  },
+  methods: {
+    togglePublicity () {
+      this.imageData.isPublic = !this.imageData.isPublic;
+      console.log('p', this.imageData.isPublic);
+    }
   }
 }
 </script>
