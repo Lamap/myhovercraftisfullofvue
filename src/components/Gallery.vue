@@ -48,6 +48,8 @@
 import MasonryList from '@/components/masonryList';
 import ImageCard from '@/components/ImageCard.vue';
 import VueTagsInput from '@johmun/vue-tags-input';
+import firebase from 'firebase';
+
 export default {
   components: {
     MasonryList,
@@ -56,6 +58,15 @@ export default {
   },
   created () {
     console.log('gallery-created');
+    this.db = firebase.firestore();
+    this.db.collection('images')
+        .onSnapshot((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        console.log(`${doc.id} => ${doc.data().src}`);
+      });
+      console.log('\n --------------------');
+    });
+
   },
   data () {
     return {
