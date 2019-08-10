@@ -1,15 +1,38 @@
 <template>
   <div class="hvr-header">
     myhovercraftisfullof
-    <span class="hvr-header__count">333</span>
+    <span class="hvr-header__count">{{displayedCount}}/</span>
+    <span class="hvr-header__count">{{totalCount}}</span>
     eels
-    <span class="hvr-image-header__add-new-button">
-        <md-button class="md-icon-button">
-          <md-icon class="hvr-icon-blue">add_circle</md-icon>
-        </md-button>
-      </span>
+
+    <file-selector @filesSelected="onFilesSelected"/>
   </div>
 </template>
+<script>
+import FileSelector from '@/components/FileSelector';
+import { mapState, mapGetters } from 'vuex';
+
+export default {
+  created () {
+    console.log('header created');
+  },
+  components: {
+    FileSelector
+  },
+  computed: {
+    ...mapState({
+     displayedCount: 'displayedImageCount'
+    }),
+    ...mapGetters(['totalCount'])
+  },
+  methods: {
+    onFilesSelected (files) {
+      console.log('files', files);
+      this.$store.dispatch('addImages', files);
+    }
+  }
+}
+</script>
 <style lang="less">
   .hvr-header {
     color: #999;

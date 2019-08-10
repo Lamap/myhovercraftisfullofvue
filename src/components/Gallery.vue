@@ -37,7 +37,7 @@
       selected
       <span class="hvr-gallery__clear-selection">or clear selection</span>
     </div>
-    <MasonryList :items="items">
+    <MasonryList :items="fullList">
       <template v-slot:list-item="slotProps">
         <ImageCard :imageData="slotProps.item"></ImageCard>
       </template>
@@ -48,7 +48,7 @@
 import MasonryList from '@/components/masonryList';
 import ImageCard from '@/components/ImageCard.vue';
 import VueTagsInput from '@johmun/vue-tags-input';
-import firebase from 'firebase';
+import { mapState } from 'vuex';
 
 export default {
   components: {
@@ -58,46 +58,11 @@ export default {
   },
   created () {
     console.log('gallery-created');
-    this.db = firebase.firestore();
-    this.db.collection('images')
-        .onSnapshot((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        console.log(`${doc.id} => ${doc.data().src}`);
-      });
-      console.log('\n --------------------');
-    });
-
   },
   data () {
     return {
       showOnlyNonTagged: false,
       tag: '',
-      items: [
-        {
-          name: 'jenő',
-          id: 10,
-          src: 'https://firebasestorage.googleapis.com/v0/b/myhovecraft.appspot.com/o/hvr%2Fspg-1558102404135?alt=media&token=b6f0f567-e5dc-466e-9d33-6149da491f77',
-          isPublic: false
-        },
-        {
-          name: 'béla',
-          id: 20,
-          src: 'https://www.fillmurray.com/200/200',
-          isPublic: true
-        },
-        {
-          name: 'hurka',
-          id: 30,
-          src: 'https://www.fillmurray.com/300/400',
-          isPublic: false
-        },
-        {
-          name: 'gyurka',
-          id: 40,
-          src: 'https://www.fillmurray.com/300/500',
-          isPublic: false
-        }
-      ],
       existingTags: [
         {
           text: 'abc'
@@ -118,13 +83,17 @@ export default {
   },
   computed: {
     selectedItems () {
-      const selection = this.items.filter(item => item.isSelected);
+      const selection = this.fullList.filter(item => item.isSelected);
       console.log('selection changed', selection);
       return selection;
     },
     filteredTags () {
       return this.existingTags.filter(tag => tag.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1);
-    }
+    },
+    ...mapState({
+      fullList: 'fullImageList',
+      allTags: 'avalaibleTags'
+    })
   }
 }
 </script>
