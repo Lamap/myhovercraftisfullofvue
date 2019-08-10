@@ -10,9 +10,9 @@ const tagCollection = db.collection('tags');
 
 const imageStorageBasePath = 'hvr';
 
-const saveOneImage = (file) => {
+const saveOneImage = (file, index) => {
   const origFileName = file.name;
-  const fileName = 'spg-' + (new Date()).getTime().toString();
+  const fileName = 'spg-' + (new Date()).getTime().toString() + '-' + index;
   const filePath = `${imageStorageBasePath}/${fileName}`;
 
   return storageRef.child(filePath).put(file)
@@ -30,9 +30,9 @@ const saveOneImage = (file) => {
 
 export default {
   addImages (files) {
-    const allImageSavings = files.map( file => {
+    const allImageSavings = files.map( (file, index) => {
       console.log('filename', file.name);
-      return saveOneImage(file);
+      return saveOneImage(file, index);
     })
     return Promise.all(allImageSavings);
   },
