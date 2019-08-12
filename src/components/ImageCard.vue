@@ -22,14 +22,27 @@
         </md-button>
       </span>
     </div>
-    <md-autocomplete v-model="imageData.tags" :md-options="existingTags" />
+    <vue-tags-input
+        class="hvr-imagecard__tags"
+        v-model="tagOnTheFly"
+        :tags="imageData.tags"
+        :autocomplete-items="existingTags"
+        placeholder="Pin tag"
+        @before-adding-tag="tagIsToAdded"
+        @before-deleting-tag="tagIsToDeleted"
+    />
     <span class="hvr-imagecard__checkbox">
         <md-checkbox v-model="imageData.isSelected"></md-checkbox>
     </span>
   </div>
 </template>
 <script>
+import VueTagsInput from '@johmun/vue-tags-input';
+
 export default {
+  components: {
+    VueTagsInput
+  },
   props: {
     imageData: {
       type: Object
@@ -41,7 +54,8 @@ export default {
   data () {
     return {
       bela: true,
-      existingTags: ['jo', 'ne', 'na']
+      existingTags: [{text: 'jooooo'}, {text: 'aaaaa'}, {text: 'bbbb'}, {text: 'cccc'}],
+      tagOnTheFly: ''
     }
   },
   created () {
@@ -51,6 +65,24 @@ export default {
     togglePublicity () {
       this.imageData.isPublic = !this.imageData.isPublic;
       console.log('p', this.imageData.isPublic);
+    },
+    tagIsToAdded (payLoad) {
+      console.log('addT-:', payLoad, this.imageData);
+      payLoad.addTag(payLoad.tag.text);
+      this.$store.dispatch('addTagToImage', {
+        imageData: this.imageData,
+        tag: payLoad.tag.text
+      });
+    },
+    tagIsToDeleted (payLoad) {
+      console.log('to delete', payLoad);
+      //TODO: wondering if we want a confirmation for preventing unwanted deletes by backspace
+      payLoad.deleteTag(payLoad.index);
+
+      this.$store.dispatch('removeTagFromImage', {
+        imageData: this.imageData,
+        tag: payLoad.tag
+      });
     }
   }
 }

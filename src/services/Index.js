@@ -23,7 +23,7 @@ const saveOneImage = (file, index) => {
             filePath: filePath,
             originalName: origFileName,
             created: new Date().getTime()
-          })
+          });
         });
       });
 };
@@ -33,13 +33,16 @@ export default {
     const allImageSavings = files.map( (file, index) => {
       console.log('filename', file.name);
       return saveOneImage(file, index);
-    })
+    });
     return Promise.all(allImageSavings);
   },
-  addTag (tag) {
+  createTag (tagValue) {
     return tagCollection.add({
-      value: tag
+      text: tagValue
     });
+  },
+  updateTagsOnImage(imageData) {
+    return imageCollection.doc(imageData.id).set({ tags: imageData.tags }, { merge: true });
   },
   onImagesSnapshot (listener) {
     // TODO: implement some throtthle or debounce

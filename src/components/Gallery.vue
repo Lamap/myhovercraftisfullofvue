@@ -7,8 +7,9 @@
           :tags="selectedTags"
           :autocomplete-items="filteredTags"
           :disabled="showOnlyNonTagged"
+          :add-only-from-autocomplete="true"
           placeholder="Add search tag"
-          @tags-changed="newTags => selectedTags = newTags"
+          @tags-changed="tagFiltersUpdated"
       />
       <span class="hvr-gallery__non-tagged-filter">
         only non-tagged
@@ -94,6 +95,11 @@ export default {
       fullList: 'fullImageList',
       allTags: 'avalaibleTags'
     })
+  },
+  methods: {
+    tagFiltersUpdated (newTag) {
+      console.log(newTag);
+    }
   }
 }
 </script>
