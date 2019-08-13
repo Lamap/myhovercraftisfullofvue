@@ -26,7 +26,7 @@
         class="hvr-imagecard__tags"
         v-model="tagOnTheFly"
         :tags="imageData.tags"
-        :autocomplete-items="existingTags"
+        :autocomplete-items="tagsForAutoComplete"
         placeholder="Pin tag"
         @before-adding-tag="tagIsToAdded"
         @before-deleting-tag="tagIsToDeleted"
@@ -38,6 +38,7 @@
 </template>
 <script>
 import VueTagsInput from '@johmun/vue-tags-input';
+import { mapState } from 'vuex';
 
 export default {
   components: {
@@ -54,12 +55,21 @@ export default {
   data () {
     return {
       bela: true,
-      existingTags: [{text: 'jooooo'}, {text: 'aaaaa'}, {text: 'bbbb'}, {text: 'cccc'}],
       tagOnTheFly: ''
     }
   },
   created () {
     console.log('imageCard created');
+  },
+  computed: {
+    tagsForAutoComplete () {
+      const filtered = this.existingTags.filter(({ text }) => {
+        return text.toLowerCase().indexOf(this.tagOnTheFly.toLowerCase()) !== -1
+      });
+      console.log(filtered);
+      return filtered;
+    },
+    ...mapState(['existingTags'])
   },
   methods: {
     togglePublicity () {

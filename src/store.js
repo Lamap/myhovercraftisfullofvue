@@ -18,14 +18,14 @@ const store = new Vuex.Store({
     filteringTags: [],
     listOnlyTagless: false,
     displayedImageCount: 4,
-    avalaibleTags: []
+    existingTags: []
   },
   mutations: {
     updateImageList (state, payload) {
       state.fullImageList = payload;
     },
     updateTagsList (state, payload) {
-      state.avalaibleTags = payload;
+      state.existingTags = payload;
     },
     showPreloader (state, payload) {
       state.isWaiting = payload;
@@ -53,10 +53,7 @@ const store = new Vuex.Store({
 
     },
     addTagToImage (context, payload) {
-      const existingTag = context.state.avalaibleTags.find(tag => payload.tag === tag.text);
-      if (!payload.imageData.tags) {
-        payload.image.tags = [];
-      }
+      const existingTag = context.state.existingTags.find(tag => payload.tag === tag.text);
 
       if (!existingTag) {
         return services.createTag(payload.tag).then(tagDocRef => {
@@ -95,12 +92,7 @@ services.onImagesSnapshot(querySnapshot => {
     const data = doc.data();
     return {
       id: doc.id,
-      tags: [
-        {
-          text: 'jenőserceg',
-          id: 'tagIddddd2323123'
-        }
-      ],
+      tags: [],
       ...data
     };
   });
