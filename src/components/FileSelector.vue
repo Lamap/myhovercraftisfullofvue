@@ -21,9 +21,6 @@
 </style>
 <script>
 export default {
-  mounted () {
-    console.log('f input ref', this.$refs.fileinput);
-  },
   props: {
     maxFileSizeInBytes: {
       type: Number,

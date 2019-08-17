@@ -17,20 +17,29 @@
         <md-icon class="hvr-icon-blue">find_replace</md-icon>
       </md-button>
       <span class="hvr-imagecard__delete-button">
-        <md-button class="md-icon-button">
+        <md-button class="md-icon-button" @click.prevent="deleteImage">
           <md-icon class="hvr-icon-red">delete</md-icon>
         </md-button>
       </span>
     </div>
     <vue-tags-input
-        class="hvr-imagecard__tags"
+        class="hvr-imagecard__editable-tags"
         v-model="tagOnTheFly"
         :tags="imageData.tags"
         :autocomplete-items="tagsForAutoComplete"
         placeholder="Pin tag"
         @before-adding-tag="tagIsToAdded"
         @before-deleting-tag="tagIsToDeleted"
+        v-if="loggedUser"
     />
+    <div v-if="!loggedUser" class="hvr-imagecard__readonly-tags">
+      <span
+          v-for="tag in imageData.tags"
+          :key="tag.id"
+          class="hvr-imagecard__readonly-tag-item"
+          @click="filterOnTag(tag.text)"
+      >#{{tag.text}}</span>
+    </div>
     <span class="hvr-imagecard__checkbox">
         <md-checkbox v-model="imageData.isSelected"></md-checkbox>
     </span>
@@ -69,7 +78,7 @@ export default {
       console.log(filtered);
       return filtered;
     },
-    ...mapState(['existingTags'])
+    ...mapState(['existingTags', 'loggedUser'])
   },
   methods: {
     togglePublicity () {
@@ -81,7 +90,7 @@ export default {
       payLoad.addTag(payLoad.tag.text);
       this.$store.dispatch('addTagToImage', {
         imageData: this.imageData,
-        tag: payLoad.tag.text
+        tag: payLoad.tag
       });
     },
     tagIsToDeleted (payLoad) {
@@ -93,6 +102,12 @@ export default {
         imageData: this.imageData,
         tag: payLoad.tag
       });
+    },
+    filterOnTag (tagToFilter) {
+      console.log(tagToFilter);
+    },
+    deleteImage () {
+      this.$store.dispatch('deleteImages', [this.imageData]);
     }
   }
 }
@@ -112,6 +127,8 @@ export default {
     margin: (@card-horizontal-margins + 1px) 1px;
     border: 1px solid @card-border-color;
     border-radius: @card-border-radius;
+    user-select: none;
+
     &:hover::after {
       width: @bubble-diameter;
       height: @bubble-diameter;
@@ -163,8 +180,22 @@ export default {
       position: relative;
     }
 
-    &__tags {
+    &__editable-tags {
       color: @blue-color;
+    }
+
+    &__readonly-tags {
+      position: relative;
+    }
+
+    &__readonly-tag-item {
+
+      &:not(first-child) {
+        margin-left: 0.5rem;
+      }
+
+      color: @blue-color;
+      cursor: pointer;
     }
 
     &__actions {

@@ -16,7 +16,7 @@ const saveOneImage = (file, index) => {
   const filePath = `${imageStorageBasePath}/${fileName}`;
 
   return storageRef.child(filePath).put(file)
-      .then(snapshot => {
+      .then(() => {
         return storageRef.child(filePath).getDownloadURL().then(url => {
           return imageCollection.add({
             src: url,
@@ -28,6 +28,17 @@ const saveOneImage = (file, index) => {
       });
 };
 
+const deleteOneImage = (image) => {
+  console.log('toDelete:::', image);
+  if (!image.filePath) {
+    return imageCollection.doc(image.id).delete();
+  }
+  return storageRef.child(image.filePath).delete()
+    .then(() => {
+      return imageCollection.doc(image.id).delete();
+    });
+};
+
 export default {
   addImages (files) {
     const allImageSavings = files.map( (file, index) => {
@@ -35,6 +46,13 @@ export default {
       return saveOneImage(file, index);
     });
     return Promise.all(allImageSavings);
+  },
+  deleteImages (images) {
+    const allImageDeletes = images.map ( image => {
+      return deleteOneImage(image);
+    });
+
+    return Promise.all(allImageDeletes);
   },
   createTag (tagValue) {
     return tagCollection.add({
@@ -46,7 +64,7 @@ export default {
   },
   onImagesSnapshot (listener) {
     // TODO: implement some throtthle or debounce
-    imageCollection.onSnapshot((querySnapshot) => {
+    imageCollection.orderBy('created', 'desc').onSnapshot((querySnapshot) => {
       listener(querySnapshot);
     });
   },
@@ -55,5 +73,16 @@ export default {
     tagCollection.onSnapshot((querySnapshot) => {
       listener(querySnapshot);
     });
+  },
+  onUserStateSnapshot (listener) {
+    firebase.auth().onAuthStateChanged((user) => {
+      listener(user);
+    });
+  },
+  logUserIn(payload) {
+    return firebase.auth().signInWithEmailAndPassword(payload.username, payload.password);
+  },
+  logUserOut() {
+    return firebase.auth().signOut();
   }
 }

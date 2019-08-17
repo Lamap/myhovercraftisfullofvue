@@ -4,7 +4,6 @@
       <vue-tags-input
           class="hvr-gallery__search-input"
           v-model="tag"
-          :tags="selectedTags"
           :autocomplete-items="filteredTags"
           :disabled="showOnlyNonTagged"
           :add-only-from-autocomplete="true"
@@ -14,7 +13,7 @@
       <span class="hvr-gallery__non-tagged-filter">
         only non-tagged
         <span class="hvr-gallery__non-tagged-filter-checkbox">
-          <md-checkbox v-model="showOnlyNonTagged"></md-checkbox>
+          <md-checkbox v-model="showOnlyNonTagged" @change="showOnlyTaglessChanged"></md-checkbox>
         </span>
       </span>
     </div>
@@ -38,7 +37,7 @@
       selected
       <span class="hvr-gallery__clear-selection">or clear selection</span>
     </div>
-    <MasonryList :items="fullList">
+    <MasonryList :items="partialImageList">
       <template v-slot:list-item="slotProps">
         <ImageCard :imageData="slotProps.item"></ImageCard>
       </template>
@@ -63,23 +62,7 @@ export default {
   data () {
     return {
       showOnlyNonTagged: false,
-      tag: '',
-      existingTags: [
-        {
-          text: 'abc'
-        },
-        {
-          text: 'abcd'
-        },
-        {
-          text: 'abcde'
-        }
-      ],
-      selectedTags: [
-        {
-          text: 'abc'
-        }
-      ]
+      tag: ''
     };
   },
   computed: {
@@ -89,16 +72,25 @@ export default {
       return selection;
     },
     filteredTags () {
-      return this.existingTags.filter(tag => tag.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1);
+      return this.allTags.filter(tag => tag.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1);
     },
     ...mapState({
       fullList: 'fullImageList',
-      allTags: 'avalaibleTags'
+      partialImageList: 'partialImageList',
+      allTags: 'existingTags'
     })
   },
   methods: {
-    tagFiltersUpdated (newTag) {
-      console.log(newTag);
+    tagFiltersUpdated (tags) {
+      console.log(tags);
+      this.$store.commit('setFiltering', { tags });
+    },
+    showOnlyTaglessChanged (value) {
+      console.log(value);
+      this.$store.commit('setFiltering', {
+        tags: this.$store.state.filteringTags,
+        onlyNontagged: value
+      })
     }
   }
 }
