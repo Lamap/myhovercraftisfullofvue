@@ -31,13 +31,17 @@
         @before-adding-tag="tagIsToAdded"
         @before-deleting-tag="tagIsToDeleted"
         v-if="loggedUser"
-    />
+    >
+      <div slot="tag-center" slot-scope="props">
+        <span @click="filterOnTag(props.tag)">#{{props.tag.text}}</span>
+      </div>
+    </vue-tags-input>
     <div v-if="!loggedUser" class="hvr-imagecard__readonly-tags">
       <span
           v-for="tag in imageData.tags"
           :key="tag.id"
           class="hvr-imagecard__readonly-tag-item"
-          @click="filterOnTag(tag.text)"
+          @click="filterOnTag(tag)"
       >#{{tag.text}}</span>
     </div>
     <span class="hvr-imagecard__checkbox">
@@ -103,11 +107,12 @@ export default {
         tag: payLoad.tag
       });
     },
-    filterOnTag (tagToFilter) {
-      console.log(tagToFilter);
-    },
     deleteImage () {
       this.$store.dispatch('deleteImages', [this.imageData]);
+    },
+    filterOnTag(tag) {
+      console.log(':::', tag);
+      this.$store.commit('setFiltering', { tags: [ tag ] });
     }
   }
 }

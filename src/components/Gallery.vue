@@ -9,6 +9,7 @@
           :add-only-from-autocomplete="true"
           placeholder="Add search tag"
           @tags-changed="tagFiltersUpdated"
+          :tags="activeFilteringTags"
       />
       <span class="hvr-gallery__non-tagged-filter">
         only non-tagged
@@ -32,10 +33,21 @@
           <md-icon class="hvr-icon-red">delete</md-icon>
         </md-button>
       </span>
-      with
       <span class="hvr-gallery__selection-count">{{selectedItems.length}}</span>
       selected
       <span class="hvr-gallery__clear-selection">or clear selection</span>
+      <div class="hvr-gallery__bulk-tagging">
+        <vue-tags-input
+            v-model="bulkTag"
+            :tags="bulkAddingTags"
+            :autocomplete-items="filteredTagsForBulk"
+            @tags-changed="newTags => bulkAddingTags = newTags"
+            placeholder="Add tags to the selected images"
+        ></vue-tags-input>
+        <md-button @click="addBulkTags">
+          Add tags to the {{selectedItems.length}} images
+        </md-button>
+      </div>
     </div>
     <MasonryList :items="partialImageList">
       <template v-slot:list-item="slotProps">
@@ -62,7 +74,9 @@ export default {
   data () {
     return {
       showOnlyNonTagged: false,
-      tag: ''
+      tag: '',
+      bulkTag: '',
+      bulkAddingTags: []
     };
   },
   computed: {
@@ -72,12 +86,16 @@ export default {
       return selection;
     },
     filteredTags () {
-      return this.allTags.filter(tag => tag.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1);
+      return this.getAutocompleteItems(this.tag);
+    },
+    filteredTagsForBulk () {
+      return this.getAutocompleteItems(this.bulkTag);
     },
     ...mapState({
       fullList: 'fullImageList',
       partialImageList: 'partialImageList',
-      allTags: 'existingTags'
+      allTags: 'existingTags',
+      activeFilteringTags: 'filteringTags'
     })
   },
   methods: {
@@ -91,6 +109,16 @@ export default {
         tags: this.$store.state.filteringTags,
         onlyNontagged: value
       })
+    },
+    addBulkTags () {
+      if (!this.bulkAddingTags.length) {
+        return;
+      }
+      this.$store.dispatch('addTagsToImages', {images: this.selectedItems, tags: this.bulkAddingTags})
+      this.bulkAddingTags = [];
+    },
+    getAutocompleteItems (input) {
+      return this.allTags.filter(tag => tag.text.toLowerCase().indexOf(input.toLowerCase()) !== -1);
     }
   }
 }

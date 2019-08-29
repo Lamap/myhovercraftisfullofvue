@@ -57,6 +57,9 @@ export default {
   createTag (tagValue) {
     return tagCollection.add({
       text: tagValue
+    }).then(docRef => {
+      docRef.text = tagValue;
+      return docRef;
     });
   },
   updateTagsOnImage(imageData) {
@@ -70,7 +73,7 @@ export default {
   },
   onTagsSnapshot (listener) {
     // TODO: implement some throtthle or debounce
-    tagCollection.onSnapshot((querySnapshot) => {
+    tagCollection.orderBy('text').onSnapshot((querySnapshot) => {
       listener(querySnapshot);
     });
   },
