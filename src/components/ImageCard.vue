@@ -52,6 +52,7 @@
 <script>
 import VueTagsInput from '@johmun/vue-tags-input';
 import { mapState } from 'vuex';
+import { FILTERING_TAG_QUERY_NAME } from '../store';
 
 export default {
   components: {
@@ -112,7 +113,10 @@ export default {
     },
     filterOnTag(tag) {
       console.log(':::', tag);
-      this.$store.commit('setFiltering', { tags: [ tag ] });
+      let query = {};
+      query[FILTERING_TAG_QUERY_NAME] = [tag.text];
+      this.$router.push({ query: query });
+      this.$store.commit('setFiltering', { tags: this.$store.state.route.query[FILTERING_TAG_QUERY_NAME] });
     }
   }
 }

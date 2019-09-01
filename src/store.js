@@ -5,13 +5,6 @@ import _ from 'lodash';
 
 Vue.use(Vuex);
 
-// TODO: lead out all FB assync methods to a service
-/*
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const storageRef = firebase.storage().ref();
-*/
-
 const store = new Vuex.Store({
   state: {
     isWaiting: false,
@@ -37,25 +30,24 @@ const store = new Vuex.Store({
       state.loggedUser = payload.user;
     },
     setFiltering (state, payload) {
-      state.filteringTags = payload.tags;
       if (payload.onlyNontagged) {
         return state.partialImageList = state.fullImageList.filter(image => !image.tags.length);
       }
-      if (!payload.tags.length) {
+      if (!_.isArray(payload.tags) || !payload.tags.length) {
         return state.partialImageList = state.fullImageList;
       }
-      // TODO: change to ID-based comparision
       state.partialImageList = state.fullImageList.filter(image => {
         if (!image.tags.length) {
           return false;
         }
-        for (let { text } of payload.tags) {
-          if (!image.tags.find(tagOnImage => tagOnImage.text === text)) {
+        for (let filterTag of payload.tags) {
+          if (!image.tags.find(tagOnImage => tagOnImage.text === filterTag)) {
             return false;
           }
         }
         return true;
       });
+      console.log('ehh: ', state.route);
     }
   },
   actions: {
@@ -155,7 +147,7 @@ const store = new Vuex.Store({
 
     },
     removeTagFromImage (context, payload) {
-      context.commit('setFiltering', { tags: context.state.filteringTags });
+      context.commit('setFiltering', { tags: context.state[FILTERING_TAG_QUERY_NAME] });
       payload.imageData.tags = payload.imageData.tags.filter(({id}) => payload.tag.id !== id);
       services.updateTagsOnImage(payload.imageData)
         .catch(err => {
@@ -167,7 +159,22 @@ const store = new Vuex.Store({
     }
   },
   getters: {
-    totalCount: state => state.fullImageList.length
+    totalCount: state => state.fullImageList.length,
+    tagObjectsFromFilter: state => {
+      if (!state.route.query[FILTERING_TAG_QUERY_NAME]) {
+        return [];
+      }
+      if (typeof state.route.query[FILTERING_TAG_QUERY_NAME] === 'string') {
+        return [{
+          text: state.route.query[FILTERING_TAG_QUERY_NAME]
+        }]
+      }
+      return state.route.query[FILTERING_TAG_QUERY_NAME].map(tag => {
+        return {
+          text: tag
+        };
+      });
+    }
   }
 });
 
@@ -181,7 +188,11 @@ services.onImagesSnapshot(querySnapshot => {
     };
   });
   store.commit('updateImageList', imagesPayload);
-  store.commit('setFiltering', { tags: store.state.filteringTags });
+  let filterTags = store.state.route.query[FILTERING_TAG_QUERY_NAME];
+  if (typeof store.state.route.query[FILTERING_TAG_QUERY_NAME] === 'string') {
+    filterTags = [store.state.route.query[FILTERING_TAG_QUERY_NAME]];
+  }
+  store.commit('setFiltering', { tags:  filterTags});
   console.log('imagesSnapshot:::', imagesPayload);
 });
 services.onTagsSnapshot(querySnapshot => {
@@ -201,3 +212,4 @@ services.onUserStateSnapshot(user => {
   store.commit('setUser', { user: user ? user.email : null });
 });
 export default store;
+export const FILTERING_TAG_QUERY_NAME = 'tagfilters';

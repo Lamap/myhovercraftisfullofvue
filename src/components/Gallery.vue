@@ -61,6 +61,7 @@ import MasonryList from '@/components/masonryList';
 import ImageCard from '@/components/ImageCard.vue';
 import VueTagsInput from '@johmun/vue-tags-input';
 import { mapState } from 'vuex';
+import { FILTERING_TAG_QUERY_NAME } from '../store';
 
 export default {
   components: {
@@ -91,22 +92,28 @@ export default {
     filteredTagsForBulk () {
       return this.getAutocompleteItems(this.bulkTag);
     },
+    // TODO: put the query property into a constant
+    activeFilteringTags () {
+      return this.$store.getters.tagObjectsFromFilter;
+    },
     ...mapState({
       fullList: 'fullImageList',
       partialImageList: 'partialImageList',
-      allTags: 'existingTags',
-      activeFilteringTags: 'filteringTags'
+      allTags: 'existingTags'
     })
   },
   methods: {
     tagFiltersUpdated (tags) {
       console.log(tags);
-      this.$store.commit('setFiltering', { tags });
+      let query = {};
+      query[FILTERING_TAG_QUERY_NAME] = tags.map(tag => tag.text);
+      this.$router.push({ query: query });
+      this.$store.commit('setFiltering', { tags: this.$store.state.route.query[FILTERING_TAG_QUERY_NAME] });
     },
     showOnlyTaglessChanged (value) {
       console.log(value);
       this.$store.commit('setFiltering', {
-        tags: this.$store.state.filteringTags,
+        tags: this.$store.state[FILTERING_TAG_QUERY_NAME],
         onlyNontagged: value
       })
     },
