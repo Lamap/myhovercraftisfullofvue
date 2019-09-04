@@ -59,7 +59,6 @@ export default {
   },
   methods: {
     onFilesSelected (files) {
-      console.log('files', files);
       this.$store.dispatch('addImages', files);
     },
     openLoginDialog () {

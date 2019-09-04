@@ -1,15 +1,32 @@
 <template>
-  <div class="hvr-imagelist" ref="imagelist">
-    <div
-      v-for="(row, rowIndex) in structuredItems"
-      :key="rowIndex"
-      :class="colClass"
-      class="hvr-imagelist__col"
-    >
-      <div v-for="item in row" :key="item.id">
-        <slot name="list-item" :item="item">
-        </slot>
+  <div>
+    <div class="hvr-imagelist" ref="imagelist">
+      <div
+          v-for="(col, colIndex) in structuredItems"
+          :key="colIndex"
+          :class="colClass"
+          class="hvr-imagelist__col"
+      >
+        <div v-for="item in col" :key="item.id" @click="imageClicked(item)">
+          <slot name="list-item" :item="item"  >
+          </slot>
+        </div>
       </div>
+    </div>
+    <div class="csigalofasz">
+      <md-dialog :md-active.sync="showImagePopup">
+        <md-dialog-content>
+          <div class="hvr-image-popup">
+            <img v-if="shownImage" :src="shownImage.src" class="hvr-image-popup__image"/>
+            <div class="hvr-image-popup__left" @click="stepLeft">
+              <md-icon class="md-size-4x">chevron_left</md-icon>
+            </div>
+            <div class="hvr-image-popup__right" @click="stepRight">
+              <md-icon class="md-size-4x">chevron_right</md-icon>
+            </div>
+          </div>
+        </md-dialog-content>
+      </md-dialog>
     </div>
   </div>
 </template>
@@ -19,7 +36,9 @@ export default {
   name: 'masonryList',
   data () {
     return {
-      containerWidth: 0
+      containerWidth: 0,
+      showImagePopup: false,
+      shownImage: null
     }
   },
   props: {
@@ -33,10 +52,8 @@ export default {
     }
   },
   created () {
-    console.log('masonry list created hónaljBéla levelesJenőSercegésféleség..ss .')
     window.addEventListener('resize', () => {
       this.containerWidth = this.$refs.imagelist.clientWidth;
-      console.log('resize', this.$refs.imagelist.clientWidth);
     })
   },
   mounted () {
@@ -51,18 +68,40 @@ export default {
     },
     structuredItems () {
       const structured = [];
-      for (let colIndex = 0; colIndex < this.colCount; colIndex++) {
-        structured[colIndex] = this.items.filter((item, itemIndex) => {
-          return (itemIndex % this.colCount) === colIndex;
-        });
+
+      for (let colIndex = 0; colIndex < this.colCount; colIndex++ ) {
+        structured.push([]);
       }
-      console.log(structured);
+      this.items.forEach((item, index) => {
+        const colIndex = index % this.colCount;
+        item.flatIndex = index;
+        structured[colIndex].push(item);
+      });
+
       return structured;
     }
   },
   methods: {
     bottomReached () {
       this.$emit('imagelist:bottom-reached')
+    },
+    imageClicked (imageData) {
+      this.shownImage = imageData;
+      this.showImagePopup = true;
+    },
+    stepLeft () {
+      if (this.shownImage.flatIndex === 0 ) {
+        this.shownImage = this.items.find(item => item.flatIndex === this.items.length - 1);
+      } else {
+        this.shownImage = this.items.find(item => item.flatIndex  === this.shownImage.flatIndex - 1);
+      }
+    },
+    stepRight () {
+      if (this.shownImage.flatIndex === this.items.length - 1 ) {
+        this.shownImage = this.items.find(item => item.flatIndex === 0);
+      } else {
+        this.shownImage = this.items.find(item => item.flatIndex === this.shownImage.flatIndex + 1);
+      }
     }
   }
 }
@@ -92,6 +131,33 @@ export default {
       &--split-5 {
         width: 20%;
       }
+    }
+  }
+
+  .hvr-image-popup {
+    max-height: 100%;
+    user-select: none;
+
+    .paging-arrow {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      background: @blue-color;
+      position: absolute;
+      top: 0;
+      opacity: 0;
+      &:hover {
+        cursor: pointer;
+        opacity: 0.3;
+      }
+    }
+    &__left {
+      .paging-arrow;
+      left: 0;
+    }
+    &__right {
+      .paging-arrow;
+      left: 50%;
     }
   }
 </style>

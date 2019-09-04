@@ -1,10 +1,10 @@
 <template>
   <div class="hvr-imagecard" :class="{'hvr-imagecard--selected': imageData.isSelected}">
     <div class="hvr-imagecard__bg"></div>
-    <img class="hvr-imagecard__image" :src="imageData.src" />
+    <img class="hvr-imagecard__image" :src="imageData.src"/>
     <div class="hvr-imagecard__tags">tags...</div>
     <div class="hvr-imagecard__actions">
-      <md-button class="md-icon-button" @click="togglePublicity">
+      <md-button class="md-icon-button" @click.stop.prevent="togglePublicity">
         <md-icon class="hvr-icon-blue" :class="{'hvr-icon-blue--inactive': !imageData.isPublic}">public</md-icon>
       </md-button>
       <md-button class="md-icon-button">
@@ -17,7 +17,7 @@
         <md-icon class="hvr-icon-blue">find_replace</md-icon>
       </md-button>
       <span class="hvr-imagecard__delete-button">
-        <md-button class="md-icon-button" @click.prevent="deleteImage">
+        <md-button class="md-icon-button" @click.stop.prevent="deleteImage">
           <md-icon class="hvr-icon-red">delete</md-icon>
         </md-button>
       </span>
@@ -33,7 +33,7 @@
         v-if="loggedUser"
     >
       <div slot="tag-center" slot-scope="props">
-        <span @click="filterOnTag(props.tag)">#{{props.tag.text}}</span>
+        <span @click.stop.prevent="filterOnTag(props.tag)">#{{props.tag.text}}</span>
       </div>
     </vue-tags-input>
     <div v-if="!loggedUser" class="hvr-imagecard__readonly-tags">
@@ -41,7 +41,7 @@
           v-for="tag in imageData.tags"
           :key="tag.id"
           class="hvr-imagecard__readonly-tag-item"
-          @click="filterOnTag(tag)"
+          @click.stop.prevent="filterOnTag(tag)"
       >#{{tag.text}}</span>
     </div>
     <span class="hvr-imagecard__checkbox">
@@ -80,7 +80,6 @@ export default {
       const filtered = this.existingTags.filter(({ text }) => {
         return text.toLowerCase().indexOf(this.tagOnTheFly.toLowerCase()) !== -1
       });
-      console.log(filtered);
       return filtered;
     },
     ...mapState(['existingTags', 'loggedUser'])
@@ -91,7 +90,6 @@ export default {
       console.log('p', this.imageData.isPublic);
     },
     tagIsToAdded (payLoad) {
-      console.log('addT-:', payLoad, this.imageData);
       payLoad.addTag(payLoad.tag.text);
       this.$store.dispatch('addTagToImage', {
         imageData: this.imageData,
@@ -99,7 +97,6 @@ export default {
       });
     },
     tagIsToDeleted (payLoad) {
-      console.log('to delete', payLoad);
       //TODO: wondering if we want a confirmation for preventing unwanted deletes by backspace
       payLoad.deleteTag(payLoad.index);
 
@@ -111,8 +108,7 @@ export default {
     deleteImage () {
       this.$store.dispatch('deleteImages', [this.imageData]);
     },
-    filterOnTag(tag) {
-      console.log(':::', tag);
+    filterOnTag(tag, event) {
       let query = {};
       query[FILTERING_TAG_QUERY_NAME] = [tag.text];
       this.$router.push({ query: query });

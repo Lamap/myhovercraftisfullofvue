@@ -83,7 +83,6 @@ export default {
   computed: {
     selectedItems () {
       const selection = this.fullList.filter(item => item.isSelected);
-      console.log('selection changed', selection);
       return selection;
     },
     filteredTags () {
@@ -104,14 +103,12 @@ export default {
   },
   methods: {
     tagFiltersUpdated (tags) {
-      console.log(tags);
       let query = {};
       query[FILTERING_TAG_QUERY_NAME] = tags.map(tag => tag.text);
       this.$router.push({ query: query });
       this.$store.commit('setFiltering', { tags: this.$store.state.route.query[FILTERING_TAG_QUERY_NAME] });
     },
     showOnlyTaglessChanged (value) {
-      console.log(value);
       this.$store.commit('setFiltering', {
         tags: this.$store.state[FILTERING_TAG_QUERY_NAME],
         onlyNontagged: value

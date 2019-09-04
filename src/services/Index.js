@@ -29,7 +29,6 @@ const saveOneImage = (file, index) => {
 };
 
 const deleteOneImage = (image) => {
-  console.log('toDelete:::', image);
   if (!image.filePath) {
     return imageCollection.doc(image.id).delete();
   }
@@ -42,7 +41,6 @@ const deleteOneImage = (image) => {
 export default {
   addImages (files) {
     const allImageSavings = files.map( (file, index) => {
-      console.log('filename', file.name);
       return saveOneImage(file, index);
     });
     return Promise.all(allImageSavings);

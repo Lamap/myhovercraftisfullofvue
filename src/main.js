@@ -8,6 +8,7 @@ import 'vue-material/dist/vue-material.min.css';
 import 'vue-material/dist/theme/default.css';
 
 const unsync = sync(store, router);
+Vue.prototype.$eventBus = new Vue();
 
 Vue.config.devtools = true;
 Vue.config.productionTip = false;

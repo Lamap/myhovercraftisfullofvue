@@ -47,7 +47,6 @@ const store = new Vuex.Store({
         }
         return true;
       });
-      console.log('ehh: ', state.route);
     }
   },
   actions: {
@@ -82,7 +81,6 @@ const store = new Vuex.Store({
     addTagToImage (context, payload) {
       if (!payload.tag.id) {
         return services.createTag(payload.tag.text).then(tagDocRef => {
-          console.log('tag is created:::::', tagDocRef);
           const newTag = {
             id: tagDocRef.id,
             text: payload.tag.text
@@ -108,7 +106,6 @@ const store = new Vuex.Store({
       let allTagsToAdd = [];
       const allImageSavesJobs = [];
 
-      console.log(tags);
       tags.forEach(tag => {
         if (!tag.id) {
           tagCreationJobs.push(services.createTag(tag.text));
@@ -123,9 +120,7 @@ const store = new Vuex.Store({
             text: tag.text
           };
         });
-        console.log('newwwwtagss::::::::', newTags, 'exisingTags:::', existingTags);
         allTagsToAdd = newTags.concat(existingTags);
-        console.log('allTagsToAdd', allTagsToAdd);
         images.forEach( image => {
           image.tags = _.unionBy(allTagsToAdd, image.tags, 'id');
           image.tags = image.tags.map(({text, id}) => {
@@ -134,7 +129,6 @@ const store = new Vuex.Store({
               text
             }
           });
-          console.log('allimages - tags: ', image.tags);
           allImageSavesJobs.push(services.updateTagsOnImage(image));
         });
         Promise.all(allImageSavesJobs)
@@ -155,7 +149,7 @@ const store = new Vuex.Store({
         });
     },
     updateImage (context, payload) {
-
+      // TODO: should set only specific fields and never save local stored objects as they are
     }
   },
   getters: {
@@ -193,7 +187,6 @@ services.onImagesSnapshot(querySnapshot => {
     filterTags = [store.state.route.query[FILTERING_TAG_QUERY_NAME]];
   }
   store.commit('setFiltering', { tags:  filterTags});
-  console.log('imagesSnapshot:::', imagesPayload);
 });
 services.onTagsSnapshot(querySnapshot => {
 
@@ -205,10 +198,8 @@ services.onTagsSnapshot(querySnapshot => {
     }
   });
   store.commit('updateTagsList', tagsPayload);
-  console.log('tagsSnapshot', tagsPayload);
 });
 services.onUserStateSnapshot(user => {
-  console.log('user:::::.', user);
   store.commit('setUser', { user: user ? user.email : null });
 });
 export default store;
