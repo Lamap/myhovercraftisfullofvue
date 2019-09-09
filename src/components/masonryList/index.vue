@@ -7,13 +7,13 @@
           :class="colClass"
           class="hvr-imagelist__col"
       >
-        <div v-for="item in col" :key="item.id" @click="imageClicked(item)">
+        <div v-for="item in col" :key="item.id" @click="imageClicked(item, $event)">
           <slot name="list-item" :item="item"  >
           </slot>
         </div>
       </div>
     </div>
-    <div class="csigalofasz">
+    <div>
       <md-dialog :md-active.sync="showImagePopup">
         <md-dialog-content>
           <div class="hvr-image-popup">
@@ -85,9 +85,12 @@ export default {
     bottomReached () {
       this.$emit('imagelist:bottom-reached')
     },
-    imageClicked (imageData) {
-      this.shownImage = imageData;
-      this.showImagePopup = true;
+    imageClicked (imageData, $event) {
+      // TODO: very ugly, event should come from the imaga custom event: check out how to get it through a slotcontent
+      if ($event.target.className.indexOf('ti-new-tag-input') === -1) {
+        this.shownImage = imageData;
+        this.showImagePopup = true;
+      }
     },
     stepLeft () {
       if (this.shownImage.flatIndex === 0 ) {

@@ -31,9 +31,10 @@
         @before-adding-tag="tagIsToAdded"
         @before-deleting-tag="tagIsToDeleted"
         v-if="loggedUser"
+        @click.stop.prevent="bela"
     >
       <div slot="tag-center" slot-scope="props">
-        <span @click.stop.prevent="filterOnTag(props.tag)">#{{props.tag.text}}</span>
+        <span @click.stop.prevent="filterOnTag(props.tag)">{{props.tag.text}}</span>
       </div>
     </vue-tags-input>
     <div v-if="!loggedUser" class="hvr-imagecard__readonly-tags">
@@ -68,7 +69,6 @@ export default {
   },
   data () {
     return {
-      bela: true,
       tagOnTheFly: ''
     }
   },
@@ -85,6 +85,9 @@ export default {
     ...mapState(['existingTags', 'loggedUser'])
   },
   methods: {
+    bela () {
+      console.log('bela');
+    },
     togglePublicity () {
       this.imageData.isPublic = !this.imageData.isPublic;
       console.log('p', this.imageData.isPublic);

@@ -24,6 +24,6 @@ export default {
 </script>
 <style lang="less">
   .hvr-home {
-    padding: 2rem;
+    padding: 2rem 0;
   }
 </style>

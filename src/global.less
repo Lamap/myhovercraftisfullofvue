@@ -1,11 +1,57 @@
 @import "assets/styles/vars.less";
 
-.md-button .md-icon.md-icon-font.hvr-icon-blue {
-  color: @blue-color;
-  &--inactive {
-    color: #999999;
+.hvr-app {
+
+  .md-button .md-icon.md-icon-font.hvr-icon-blue {
+    color: @blue-color;
+    &--inactive {
+      color: #999999;
+    }
   }
-}
-.md-button .md-icon.md-icon-font.hvr-icon-red {
-  color: @red-color;
+
+  .md-button .md-icon.md-icon-font.hvr-icon-red {
+    color: @red-color;
+  }
+
+  .md-checkbox.md-theme-default.md-checked .md-checkbox-container {
+    background-color: @blue-color;
+    border-color: @blue-color;
+  }
+
+  .vue-tags-input {
+    background: none;
+    max-width: initial;
+
+    &.ti-disabled {
+      opacity: 0.4;
+    }
+
+    .ti-input {
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      border-bottom-color: @blue-color;
+    }
+
+    .ti-new-tag-input-wrapper {
+      .ti-new-tag-input {
+        background: none;
+      }
+    }
+
+    .ti-tag {
+      color: @blue-color;
+      background: @white-color;
+      border: 1px solid @blue-color;
+      border-radius: 3px;
+
+      .ti-icon-close {
+        font-weight: bold;
+      }
+
+      .ti-content {
+        cursor: pointer;
+      }
+    }
+  }
 }
