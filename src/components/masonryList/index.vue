@@ -7,8 +7,8 @@
           :class="colClass"
           class="hvr-imagelist__col"
       >
-        <div v-for="item in col" :key="item.id" @click="imageClicked(item, $event)">
-          <slot name="list-item" :item="item"  >
+        <div v-for="item in col" :key="item.id" >
+          <slot name="list-item" :item="item">
           </slot>
         </div>
       </div>
@@ -51,13 +51,18 @@ export default {
       type: Array
     }
   },
-  created () {
+  mounted () {
     window.addEventListener('resize', () => {
       this.containerWidth = this.$refs.imagelist.clientWidth;
-    })
+    });
+    if ( this.$refs.imagelist) {
+      this.containerWidth = this.$refs.imagelist.clientWidth;
+    }
+    this.$eventBus.$on('imageCard:open', this.imageClicked);
   },
-  mounted () {
-    this.containerWidth = this.$refs.imagelist.clientWidth;
+  destroy () {
+    this.$eventBus.$off('imageCard:open', this.imageClicked);
+    window.removeEventListener('resize');
   },
   computed: {
     colCount () {
@@ -85,12 +90,9 @@ export default {
     bottomReached () {
       this.$emit('imagelist:bottom-reached')
     },
-    imageClicked (imageData, $event) {
-      // TODO: very ugly, event should come from the imaga custom event: check out how to get it through a slotcontent
-      if ($event.target.className.indexOf('ti-new-tag-input') === -1) {
-        this.shownImage = imageData;
-        this.showImagePopup = true;
-      }
+    imageClicked (imageData) {
+      this.shownImage = imageData;
+      this.showImagePopup = true;
     },
     stepLeft () {
       if (this.shownImage.flatIndex === 0 ) {
@@ -133,6 +135,12 @@ export default {
       }
       &--split-5 {
         width: 20%;
+      }
+      &--split-6 {
+        width: 16.6%;
+      }
+      &--split-7 {
+        width: 14.28%;
       }
     }
   }

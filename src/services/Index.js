@@ -38,6 +38,10 @@ const deleteOneImage = (image) => {
     });
 };
 
+const updatePublicStateOnOneImage = (imageData) => {
+  return imageCollection.doc(imageData.id).set({ isPublic: imageData.isPublic }, { merge: true });
+}
+
 export default {
   addImages (files) {
     const allImageSavings = files.map( (file, index) => {
@@ -62,6 +66,12 @@ export default {
   },
   updateTagsOnImage(imageData) {
     return imageCollection.doc(imageData.id).set({ tags: imageData.tags }, { merge: true });
+  },
+  updatePublicStateOnImages(images) {
+    const jobs = images.map(image => {
+      return updatePublicStateOnOneImage(image);
+    });
+    return Promise.all(jobs);
   },
   onImagesSnapshot (listener) {
     // TODO: implement some throtthle or debounce

@@ -53,8 +53,8 @@
         </md-button>
       </div>
     </div>
-    <MasonryList :items="partialImageList">
-      <template v-slot:list-item="slotProps">
+    <MasonryList :items="partialImageList" class="hvr-gallery__image-list">
+      <template v-slot:list-item="slotProps" >
         <ImageCard :imageData="slotProps.item"></ImageCard>
       </template>
     </MasonryList>
@@ -218,6 +218,9 @@ export default {
     }
     &__bulk-tagging-submit-count {
       font-weight: bold;
+    }
+    &__image-list {
+      padding: 0 @main-horizontal-spacing;
     }
   }
 </style>

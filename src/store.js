@@ -30,13 +30,17 @@ const store = new Vuex.Store({
       state.loggedUser = payload.user;
     },
     setFiltering (state, payload) {
+      let fullList = state.fullImageList;
+      if (!state.loggedUser) {
+        fullList = state.fullImageList.filter(image => image.isPublic);
+      }
       if (payload.onlyNontagged) {
-        return state.partialImageList = state.fullImageList.filter(image => !image.tags.length);
+        return state.partialImageList = fullList.filter(image => !image.tags.length);
       }
       if (!_.isArray(payload.tags) || !payload.tags.length) {
-        return state.partialImageList = state.fullImageList;
+        return state.partialImageList = fullList;
       }
-      state.partialImageList = state.fullImageList.filter(image => {
+      state.partialImageList = fullList.filter(image => {
         if (!image.tags.length) {
           return false;
         }
@@ -150,6 +154,12 @@ const store = new Vuex.Store({
     },
     updateImage (context, payload) {
       // TODO: should set only specific fields and never save local stored objects as they are
+    },
+    updatePublicStateOnImages (context, payload) {
+      services.updatePublicStateOnImages(payload.images)
+        .catch(err => {
+          console.error(err);
+        });
     }
   },
   getters: {
@@ -201,6 +211,13 @@ services.onTagsSnapshot(querySnapshot => {
 });
 services.onUserStateSnapshot(user => {
   store.commit('setUser', { user: user ? user.email : null });
+
+  let filterTags = store.state.route.query[FILTERING_TAG_QUERY_NAME];
+  if (typeof store.state.route.query[FILTERING_TAG_QUERY_NAME] === 'string') {
+    filterTags = [store.state.route.query[FILTERING_TAG_QUERY_NAME]];
+  }
+
+  store.commit('setFiltering', { tags:  filterTags});
 });
 export default store;
 export const FILTERING_TAG_QUERY_NAME = 'tagfilters';

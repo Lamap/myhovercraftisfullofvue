@@ -1,9 +1,12 @@
 <template>
-  <div class="hvr-imagecard" :class="{'hvr-imagecard--selected': imageData.isSelected}">
+  <div
+      class="hvr-imagecard"
+      :class="{'hvr-imagecard--selected': imageData.isSelected, 'hvr-imagecard--authenticated': loggedUser}"
+  >
     <div class="hvr-imagecard__bg"></div>
-    <img class="hvr-imagecard__image" :src="imageData.src"/>
+    <img class="hvr-imagecard__image" :src="imageData.src" @click="imageClicked"/>
     <div class="hvr-imagecard__tags">tags...</div>
-    <div class="hvr-imagecard__actions">
+    <div class="hvr-imagecard__actions" v-if="loggedUser">
       <md-button class="md-icon-button" @click.stop.prevent="togglePublicity">
         <md-icon class="hvr-icon-blue" :class="{'hvr-icon-blue--inactive': !imageData.isPublic}">public</md-icon>
       </md-button>
@@ -31,7 +34,6 @@
         @before-adding-tag="tagIsToAdded"
         @before-deleting-tag="tagIsToDeleted"
         v-if="loggedUser"
-        @click.stop.prevent="bela"
     >
       <div slot="tag-center" slot-scope="props">
         <span @click.stop.prevent="filterOnTag(props.tag)">{{props.tag.text}}</span>
@@ -45,7 +47,7 @@
           @click.stop.prevent="filterOnTag(tag)"
       >#{{tag.text}}</span>
     </div>
-    <span class="hvr-imagecard__checkbox">
+    <span class="hvr-imagecard__checkbox" v-if="loggedUser">
         <md-checkbox v-model="imageData.isSelected"></md-checkbox>
     </span>
   </div>
@@ -85,12 +87,15 @@ export default {
     ...mapState(['existingTags', 'loggedUser'])
   },
   methods: {
-    bela () {
-      console.log('bela');
+    imageClicked () {
+      this.$eventBus.$emit('imageCard:open', this.imageData);
     },
     togglePublicity () {
       this.imageData.isPublic = !this.imageData.isPublic;
       console.log('p', this.imageData.isPublic);
+      this.$store.dispatch('updatePublicStateOnImages', {
+        images: [ this.imageData ]
+      });
     },
     tagIsToAdded (payLoad) {
       payLoad.addTag(payLoad.tag.text);
@@ -127,6 +132,7 @@ export default {
   @card-selected-border-color: #888;
   @card-border-radius: 4px;
   @bubble-diameter: 50px;
+  @bubble-disposition: -10px;
   @card-horizontal-margins: 20px;
 
   .hvr-imagecard {
@@ -137,27 +143,29 @@ export default {
     border-radius: @card-border-radius;
     user-select: none;
 
-    &:hover::after {
-      width: @bubble-diameter;
-      height: @bubble-diameter;
-      border-radius: 100%;
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      background: @card-bg-color;
-      content: '';
-    }
+    &--authenticated {
+      &:hover::after {
+        width: @bubble-diameter;
+        height: @bubble-diameter;
+        border-radius: 100%;
+        position: absolute;
+        top: @bubble-disposition;
+        left: @bubble-disposition;
+        background: @card-bg-color;
+        content: '';
+      }
 
-    &:hover::before {
-      width: @bubble-diameter;
-      height: @bubble-diameter;
-      border-radius: 100%;
-      position: absolute;
-      top: -11px;
-      left: -11px;
-      border: 1px solid @card-border-color;
-      box-sizing: content-box;
-      content: '';
+      &:hover::before {
+        width: @bubble-diameter;
+        height: @bubble-diameter;
+        border-radius: 100%;
+        position: absolute;
+        top: @bubble-disposition - 1px;
+        left: @bubble-disposition - 1px;
+        border: 1px solid @card-border-color;
+        box-sizing: content-box;
+        content: '';
+      }
     }
 
     &__bg {
@@ -202,6 +210,7 @@ export default {
         margin-left: 0.5rem;
       }
 
+      display: inline-block;
       color: @blue-color;
       cursor: pointer;
     }
