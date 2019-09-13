@@ -6,6 +6,7 @@ import { MdButton, MdAutocomplete, MdField, MdMenu, MdList, MdCheckbox, MdDialog
 import { sync } from 'vuex-router-sync'
 import 'vue-material/dist/vue-material.min.css';
 import 'vue-material/dist/theme/default.css';
+import VueObserveVisibility from 'vue-observe-visibility';
 
 const unsync = sync(store, router);
 Vue.prototype.$eventBus = new Vue();
@@ -19,7 +20,7 @@ Vue.use(MdMenu);
 Vue.use(MdList);
 Vue.use(MdCheckbox);
 Vue.use(MdDialog);
-// Vue.use(MdInput);
+Vue.use(VueObserveVisibility);
 
 new Vue({
   router,

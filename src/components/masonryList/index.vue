@@ -13,6 +13,7 @@
         </div>
       </div>
     </div>
+    <div class="hvr-imagelist__footer" v-observe-visibility="{callback: scrolledToBottom, throttle: 600}"></div>
     <div>
       <md-dialog :md-active.sync="showImagePopup">
         <md-dialog-content>
@@ -87,8 +88,8 @@ export default {
     }
   },
   methods: {
-    bottomReached () {
-      this.$emit('imagelist:bottom-reached')
+    scrolledToBottom (isFooterVisible) {
+      console.log('scrolledToBottom', isFooterVisible);
     },
     imageClicked (imageData) {
       this.shownImage = imageData;
@@ -119,6 +120,12 @@ export default {
     display: flex;
     margin: 0 -@horizontal-spacing;
     background-color: @bg-color;
+
+    &__footer {
+      height: 50px;
+      background: #0D98C3;
+    }
+
     &__col {
       padding: 0 @horizontal-spacing;
       &--split-1 {
