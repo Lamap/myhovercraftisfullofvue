@@ -1,7 +1,7 @@
 <template>
   <div class="hvr-header">
     myhovercraftisfullof
-    <span class="hvr-header__count">{{displayedCount}}/</span>
+    <span class="hvr-header__count">{{filteredCount}}/</span>
     <span class="hvr-header__count">{{totalCount}}</span>
     eels
 
@@ -52,10 +52,9 @@ export default {
   },
   computed: {
     ...mapState({
-     displayedCount: 'displayedImageCount',
-    loggedUser: 'loggedUser'
+      loggedUser: 'loggedUser'
     }),
-    ...mapGetters(['totalCount'])
+    ...mapGetters(['totalCount', 'filteredCount'])
   },
   methods: {
     onFilesSelected (files) {

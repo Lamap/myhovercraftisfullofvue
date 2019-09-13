@@ -10,10 +10,10 @@ const store = new Vuex.Store({
     isWaiting: false,
     loggedUser: null,
     fullImageList: [],
-    partialImageList: [],
+    filteredImageList: [],
+    displayedImageList: [],
     filteringTags: [],
     listOnlyTagless: false,
-    displayedImageCount: 4,
     existingTags: []
   },
   mutations: {
@@ -30,17 +30,13 @@ const store = new Vuex.Store({
       state.loggedUser = payload.user;
     },
     setFiltering (state, payload) {
-      let fullList = state.fullImageList;
-      if (!state.loggedUser) {
-        fullList = state.fullImageList.filter(image => image.isPublic);
-      }
       if (payload.onlyNontagged) {
-        return state.partialImageList = fullList.filter(image => !image.tags.length);
+        return state.filteredImageList = state.fullImageList.filter(image => !image.tags.length);
       }
       if (!_.isArray(payload.tags) || !payload.tags.length) {
-        return state.partialImageList = fullList;
+        return state.filteredImageList = state.fullImageList;
       }
-      state.partialImageList = fullList.filter(image => {
+      state.filteredImageList = state.fullImageList.filter(image => {
         if (!image.tags.length) {
           return false;
         }
@@ -65,6 +61,37 @@ const store = new Vuex.Store({
         .catch(err => {
           console.error(err);
         });
+    },
+    setUser (context, user) {
+      context.commit('setUser', { user: user ? user.email : null });
+      services.onImagesSnapshot(querySnapshot => {
+        context.dispatch('setImages', querySnapshot);
+      }, store.state.loggedUser);
+    },
+    setImages (context, querySnapshot) {
+      const imagesPayload = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          tags: [],
+          ...data
+        };
+      });
+      context.commit('updateImageList', imagesPayload);
+      let filterTags = context.state.route.query[FILTERING_TAG_QUERY_NAME];
+      if (typeof context.state.route.query[FILTERING_TAG_QUERY_NAME] === 'string') {
+        filterTags = [context.state.route.query[FILTERING_TAG_QUERY_NAME]];
+      }
+      context.commit('setFiltering', { tags:  filterTags});
+    },
+    setTags (context, querySnapshot) {
+      const tagsPayload = querySnapshot.docs.map(doc => {
+        return {
+          id: doc.id,
+          ...doc.data()
+        }
+      });
+      store.commit('updateTagsList', tagsPayload);
     },
     addImages (context, payload) {
       store.commit('showPreloader', true);
@@ -164,6 +191,8 @@ const store = new Vuex.Store({
   },
   getters: {
     totalCount: state => state.fullImageList.length,
+    filteredCount: state => state.filteredImageList.length,
+    displayedCount: state => state.displayedImageList.length,
     tagObjectsFromFilter: state => {
       if (!state.route.query[FILTERING_TAG_QUERY_NAME]) {
         return [];
@@ -182,42 +211,11 @@ const store = new Vuex.Store({
   }
 });
 
-services.onImagesSnapshot(querySnapshot => {
-  const imagesPayload = querySnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      tags: [],
-      ...data
-    };
-  });
-  store.commit('updateImageList', imagesPayload);
-  let filterTags = store.state.route.query[FILTERING_TAG_QUERY_NAME];
-  if (typeof store.state.route.query[FILTERING_TAG_QUERY_NAME] === 'string') {
-    filterTags = [store.state.route.query[FILTERING_TAG_QUERY_NAME]];
-  }
-  store.commit('setFiltering', { tags:  filterTags});
-});
 services.onTagsSnapshot(querySnapshot => {
-
-  /// TODO: tags needs to be mapped from tagId => tagValue structure to index => {tagValue, tagId} (component needs this)
-  const tagsPayload = querySnapshot.docs.map(doc => {
-    return {
-      id: doc.id,
-      ...doc.data()
-    }
-  });
-  store.commit('updateTagsList', tagsPayload);
+  store.dispatch('setTags', querySnapshot);
 });
 services.onUserStateSnapshot(user => {
-  store.commit('setUser', { user: user ? user.email : null });
-
-  let filterTags = store.state.route.query[FILTERING_TAG_QUERY_NAME];
-  if (typeof store.state.route.query[FILTERING_TAG_QUERY_NAME] === 'string') {
-    filterTags = [store.state.route.query[FILTERING_TAG_QUERY_NAME]];
-  }
-
-  store.commit('setFiltering', { tags:  filterTags});
+  store.dispatch('setUser', user);
 });
 export default store;
 export const FILTERING_TAG_QUERY_NAME = 'tagfilters';

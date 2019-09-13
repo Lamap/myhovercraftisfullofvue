@@ -10,6 +10,8 @@ const tagCollection = db.collection('tags');
 
 const imageStorageBasePath = 'hvr';
 
+let imageSnapshotUnsubscribe = null;
+
 const saveOneImage = (file, index) => {
   const origFileName = file.name;
   const fileName = 'spg-' + (new Date()).getTime().toString() + '-' + index;
@@ -73,9 +75,21 @@ export default {
     });
     return Promise.all(jobs);
   },
-  onImagesSnapshot (listener) {
+  onImagesSnapshot (listener, isAuthenticated) {
     // TODO: implement some throtthle or debounce
-    imageCollection.orderBy('created', 'desc').onSnapshot((querySnapshot) => {
+    if (imageSnapshotUnsubscribe) {
+      imageSnapshotUnsubscribe();
+    }
+    let imageStream = imageCollection.orderBy('created', 'desc');
+
+    if(!isAuthenticated) {
+      imageStream = imageCollection.orderBy('created', 'desc').where('isPublic', '==', true);
+    }
+
+    if (imageSnapshotUnsubscribe) {
+      imageSnapshotUnsubscribe();
+    }
+    imageSnapshotUnsubscribe = imageStream.onSnapshot((querySnapshot) => {
       listener(querySnapshot);
     });
   },

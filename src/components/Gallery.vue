@@ -53,7 +53,7 @@
         </md-button>
       </div>
     </div>
-    <MasonryList :items="partialImageList" class="hvr-gallery__image-list">
+    <MasonryList :items="filteredImageList" class="hvr-gallery__image-list">
       <template v-slot:list-item="slotProps" >
         <ImageCard :imageData="slotProps.item"></ImageCard>
       </template>
@@ -106,7 +106,7 @@ export default {
     },
     ...mapState({
       fullList: 'fullImageList',
-      partialImageList: 'partialImageList',
+      filteredImageList: 'filteredImageList',
       allTags: 'existingTags'
     })
   },
