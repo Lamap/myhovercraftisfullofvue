@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @keyup="onKeyup">
     <div class="hvr-imagelist" ref="imagelist">
       <div
           v-for="(col, colIndex) in structuredItems"
@@ -13,12 +13,17 @@
         </div>
       </div>
     </div>
-    <div class="hvr-imagelist__footer" v-observe-visibility="{callback: scrolledToBottom, throttle: 600}"></div>
+    <div class="hvr-imagelist__sticky-footer" v-if="restOfImages > 0">
+      <span class="hvr-imagelist__sticky-footer-text">
+        still {{restOfImages}} to show...
+      </span>
+    </div>
+    <div class="hvr-imagelist__bottom-observer" v-observe-visibility="{callback: scrolledToBottom, throttle: 600}"></div>
     <div>
       <md-dialog :md-active.sync="showImagePopup">
         <md-dialog-content>
           <div class="hvr-image-popup">
-            <img v-if="shownImage" :src="shownImage.src" class="hvr-image-popup__image"/>
+            <img v-if="shownImage" :src="shownImage.src" class="hvr-image-popup__image md-image"/>
             <div class="hvr-image-popup__left" @click="stepLeft">
               <md-icon class="md-size-4x">chevron_left</md-icon>
             </div>
@@ -33,6 +38,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 export default {
   name: 'masonryList',
   data () {
@@ -60,9 +66,13 @@ export default {
       this.containerWidth = this.$refs.imagelist.clientWidth;
     }
     this.$eventBus.$on('imageCard:open', this.imageClicked);
+    this.$eventBus.$on('keyup:left', this.stepLeft);
+    this.$eventBus.$on('keyup:right', this.stepRight);
   },
   destroy () {
     this.$eventBus.$off('imageCard:open', this.imageClicked);
+    this.$eventBus.$off('keyup:left', this.stepLeft);
+    this.$eventBus.$off('keyup:right', this.stepRight);
     window.removeEventListener('resize');
   },
   computed: {
@@ -85,11 +95,21 @@ export default {
       });
 
       return structured;
-    }
+    },
+    restOfImages () {
+      return this.filteredCount - this.displayedCount;
+    },
+    ...mapGetters(['displayedCount', 'filteredCount'])
   },
   methods: {
+    onKeyup() {
+      console.log('keyup');
+    },
     scrolledToBottom (isFooterVisible) {
       console.log('scrolledToBottom', isFooterVisible);
+      if (isFooterVisible) {
+        this.$store.commit('requestMoreImage', { increase: this.colCount * 3 });
+      }
     },
     imageClicked (imageData) {
       this.shownImage = imageData;
@@ -115,15 +135,39 @@ export default {
 <style lang="less">
   @import "../../global.less";
   @horizontal-spacing: 0.5rem;
+  @max-image-popup-height: 70vh;
 
   .hvr-imagelist {
     display: flex;
+    position: relative;
     margin: 0 -@horizontal-spacing;
     background-color: @bg-color;
 
-    &__footer {
-      height: 50px;
-      background: #0D98C3;
+    &__sticky-footer {
+      position: fixed;
+      display: flex;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      background: fade(@blue-color, 35%);
+    }
+    &__sticky-footer-text {
+      color: @white-color;
+      font-weight: 600;
+      text-shadow: 1px 1px 1px fade(@dark-grey-color, 50%);
+    }
+
+    &__bottom-observer {
+      height: 60px;
+      position: absolute;
+      bottom: 0;
+      background: #da5e28;
+      left: 0;
+      right: 0;
+      opacity: 0;
     }
 
     &__col {
@@ -153,14 +197,13 @@ export default {
   }
 
   .hvr-image-popup {
-    max-height: 100%;
+    max-height: @max-image-popup-height;
     user-select: none;
 
     .paging-arrow {
       width: 50%;
       height: 100%;
       display: flex;
-      background: @blue-color;
       position: absolute;
       top: 0;
       opacity: 0;
@@ -176,6 +219,10 @@ export default {
     &__right {
       .paging-arrow;
       left: 50%;
+    }
+
+    &__image {
+      max-height: @max-image-popup-height;
     }
   }
 </style>

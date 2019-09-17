@@ -120,7 +120,7 @@ export default {
       let query = {};
       query[FILTERING_TAG_QUERY_NAME] = [tag.text];
       this.$router.push({ query: query });
-      this.$store.commit('setFiltering', { tags: this.$store.state.route.query[FILTERING_TAG_QUERY_NAME] });
+      this.$store.commit('setFiltering');
     }
   }
 }

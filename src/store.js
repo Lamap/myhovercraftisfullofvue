@@ -4,7 +4,7 @@ import services from './services/Index';
 import _ from 'lodash';
 
 Vue.use(Vuex);
-
+const minDisplayImageCount = 4;
 const store = new Vuex.Store({
   state: {
     isWaiting: false,
@@ -12,6 +12,7 @@ const store = new Vuex.Store({
     fullImageList: [],
     filteredImageList: [],
     displayedImageList: [],
+    displayedImageCount: 3,
     filteringTags: [],
     listOnlyTagless: false,
     existingTags: []
@@ -30,23 +31,37 @@ const store = new Vuex.Store({
       state.loggedUser = payload.user;
     },
     setFiltering (state, payload) {
-      if (payload.onlyNontagged) {
-        return state.filteredImageList = state.fullImageList.filter(image => !image.tags.length);
+      let tagFilters = state.route.query[FILTERING_TAG_QUERY_NAME];
+      if (!tagFilters) {
+        tagFilters = [];
       }
-      if (!_.isArray(payload.tags) || !payload.tags.length) {
-        return state.filteredImageList = state.fullImageList;
+      if (typeof tagFilters === 'string') {
+        tagFilters = [tagFilters]
       }
-      state.filteredImageList = state.fullImageList.filter(image => {
-        if (!image.tags.length) {
-          return false;
-        }
-        for (let filterTag of payload.tags) {
-          if (!image.tags.find(tagOnImage => tagOnImage.text === filterTag)) {
+
+      if (payload && payload.onlyNontagged) {
+        state.filteredImageList = state.fullImageList.filter(image => !image.tags.length);
+      } else if (!tagFilters.length){
+        state.filteredImageList = state.fullImageList;
+      } else {
+        state.filteredImageList = state.fullImageList.filter(image => {
+          if (!image.tags.length) {
             return false;
           }
-        }
-        return true;
-      });
+          for (let filterTag of tagFilters) {
+            if (!image.tags.find(tagOnImage => tagOnImage.text === filterTag)) {
+              return false;
+            }
+          }
+          return true;
+        });
+      }
+      state.displayedImageList = state.filteredImageList.slice(0, minDisplayImageCount);
+    },
+    requestMoreImage (state, payload) {
+      console.log('more more more', payload.increase);
+      state.displayedImageCount = Math.min(state.displayedImageCount + payload.increase, state.filteredImageList.length);
+      state.displayedImageList = state.filteredImageList.slice(0, state.displayedImageCount);
     }
   },
   actions: {
@@ -78,11 +93,7 @@ const store = new Vuex.Store({
         };
       });
       context.commit('updateImageList', imagesPayload);
-      let filterTags = context.state.route.query[FILTERING_TAG_QUERY_NAME];
-      if (typeof context.state.route.query[FILTERING_TAG_QUERY_NAME] === 'string') {
-        filterTags = [context.state.route.query[FILTERING_TAG_QUERY_NAME]];
-      }
-      context.commit('setFiltering', { tags:  filterTags});
+      context.commit('setFiltering');
     },
     setTags (context, querySnapshot) {
       const tagsPayload = querySnapshot.docs.map(doc => {
@@ -172,7 +183,7 @@ const store = new Vuex.Store({
 
     },
     removeTagFromImage (context, payload) {
-      context.commit('setFiltering', { tags: context.state[FILTERING_TAG_QUERY_NAME] });
+      context.commit('setFiltering');
       payload.imageData.tags = payload.imageData.tags.filter(({id}) => payload.tag.id !== id);
       services.updateTagsOnImage(payload.imageData)
         .catch(err => {

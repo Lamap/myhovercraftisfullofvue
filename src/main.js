@@ -22,8 +22,19 @@ Vue.use(MdCheckbox);
 Vue.use(MdDialog);
 Vue.use(VueObserveVisibility);
 
-new Vue({
+const app = new Vue({
   router,
   store,
   render: h => h(App)
 }).$mount('#app')
+
+window.addEventListener('keyup', (event) => {
+  switch(event.keyCode) {
+    case 39:
+      app.$eventBus.$emit('keyup:right');
+      break;
+    case 37:
+      app.$eventBus.$emit('keyup:left');
+      break;
+  }
+});

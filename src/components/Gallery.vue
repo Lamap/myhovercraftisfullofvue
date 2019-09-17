@@ -12,7 +12,7 @@
           @tags-changed="tagFiltersUpdated"
           :tags="activeFilteringTags"
       />
-      <span class="hvr-gallery__non-tagged-filter">
+      <span class="hvr-gallery__non-tagged-filter" v-if="loggedUser">
         <span class="hvr-gallery__non-tagged-filter-sub">or</span>
         show only non-tagged
         <span class="hvr-gallery__non-tagged-filter-checkbox">
@@ -53,7 +53,7 @@
         </md-button>
       </div>
     </div>
-    <MasonryList :items="filteredImageList" class="hvr-gallery__image-list">
+    <MasonryList :items="displayedImageList" class="hvr-gallery__image-list">
       <template v-slot:list-item="slotProps" >
         <ImageCard :imageData="slotProps.item"></ImageCard>
       </template>
@@ -107,7 +107,9 @@ export default {
     ...mapState({
       fullList: 'fullImageList',
       filteredImageList: 'filteredImageList',
-      allTags: 'existingTags'
+      displayedImageList: 'displayedImageList',
+      allTags: 'existingTags',
+      loggedUser: 'loggedUser'
     })
   },
   methods: {
@@ -115,11 +117,10 @@ export default {
       let query = {};
       query[FILTERING_TAG_QUERY_NAME] = tags.map(tag => tag.text);
       this.$router.push({ query: query });
-      this.$store.commit('setFiltering', { tags: this.$store.state.route.query[FILTERING_TAG_QUERY_NAME] });
+      this.$store.commit('setFiltering');
     },
     showOnlyTaglessChanged (value) {
       this.$store.commit('setFiltering', {
-        tags: this.$store.state[FILTERING_TAG_QUERY_NAME],
         onlyNontagged: value
       })
     },
@@ -149,7 +150,7 @@ export default {
 
   .hvr-gallery {
     &__search {
-      padding: 0 @main-horizontal-spacing;
+      padding: 1rem @main-horizontal-spacing;
       display: flex;
       position: sticky;
       top: @header-height;
