@@ -48,7 +48,7 @@ export default {
       if (files.length) {
         const imageInspections = files.map(file => this.getImageDimensions(file));
         Promise.all(imageInspections).then(extendedFiles => {
-          this.$emit('filesSelected', files);
+          this.$emit('filesSelected', extendedFiles);
         });
       }
     },
@@ -59,7 +59,7 @@ export default {
         reader.onload = (event) => {
           const img = new Image();
           img.src = event.target.result;
-          img.onload = () => {;
+          img.onload = () => {
             file.sideRatio = Math.round(img.height / img.width * 100) / 100;
             resolve(file);
           };

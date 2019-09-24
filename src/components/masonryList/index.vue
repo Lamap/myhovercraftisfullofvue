@@ -1,5 +1,5 @@
 <template>
-  <div @keyup="onKeyup">
+  <div>
     <div class="hvr-imagelist" ref="imagelist">
       <div
           v-for="(col, colIndex) in structuredItems"
@@ -84,14 +84,19 @@ export default {
     },
     structuredItems () {
       const structured = [];
+      const columnHeights = [];
 
       for (let colIndex = 0; colIndex < this.colCount; colIndex++ ) {
         structured.push([]);
+        columnHeights.push(0);
       }
+
       this.items.forEach((item, index) => {
-        const colIndex = index % this.colCount;
+        const shortesColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
         item.flatIndex = index;
-        structured[colIndex].push(item);
+        structured[shortesColumnIndex].push(item);
+        console.log(columnHeights, shortesColumnIndex);
+        columnHeights[shortesColumnIndex] += item.sideRatio;
       });
 
       return structured;
@@ -102,9 +107,6 @@ export default {
     ...mapGetters(['displayedCount', 'filteredCount'])
   },
   methods: {
-    onKeyup() {
-      console.log('keyup');
-    },
     scrolledToBottom (isFooterVisible) {
       console.log('scrolledToBottom', isFooterVisible);
       this.$store.commit('requestMoreImage', { increase: this.colCount * 3 });

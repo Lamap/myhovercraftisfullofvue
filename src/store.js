@@ -4,7 +4,7 @@ import services from './services/Index';
 import _ from 'lodash';
 
 Vue.use(Vuex);
-const minDisplayImageCount = 12;
+const minDisplayImageCount = 14;
 const store = new Vuex.Store({
   state: {
     isWaiting: false,
