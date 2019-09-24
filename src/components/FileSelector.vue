@@ -42,16 +42,37 @@ export default {
           console.warn('Could not add this file', file.name, isInvalid);
         } else {
           files.push(file);
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = (event) => {
-            console.log(event.target);
-          };
         }
       });
+
       if (files.length) {
-        this.$emit('filesSelected', files);
+        const imageInspections = files.map(file => this.getImageDimensions(file));
+        Promise.all(imageInspections).then(extendedFiles => {
+          this.$emit('filesSelected', files);
+        });
       }
+    },
+    getImageDimensions (file) {
+      const getDimensionsTask = new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {;
+            file.sideRatio = Math.round(img.height / img.width * 100) / 100;
+            resolve(file);
+          };
+          img.onerror = (err) => {
+            reject(err);
+          }
+        };
+        reader.onerror = (err) => {
+          reject(err);
+        };
+      });
+
+      return getDimensionsTask;
     },
     isInvalid(file) {
       if (!file.type.match('image\/.*jpg|image\/.*jpeg|image\/.*png|image\/.*gif')) {

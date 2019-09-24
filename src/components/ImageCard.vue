@@ -4,7 +4,7 @@
       :class="{'hvr-imagecard--selected': imageData.isSelected, 'hvr-imagecard--authenticated': loggedUser}"
   >
     <div class="hvr-imagecard__bg"></div>
-    <img class="hvr-imagecard__image" :src="imageData.src" @click="imageClicked"/>
+    <img class="hvr-imagecard__image" :src="imageData.src" @click="imageClicked" @load="onImageLoaded" ref="imageBela"/>
     <div class="hvr-imagecard__tags">tags...</div>
     <div class="hvr-imagecard__actions" v-if="loggedUser">
       <md-button class="md-icon-button" @click.stop.prevent="togglePublicity">
@@ -24,6 +24,7 @@
           <md-icon class="hvr-icon-red">delete</md-icon>
         </md-button>
       </span>
+      <span style="z-index:100;">{{sideRatio}}</span>
     </div>
     <vue-tags-input
         class="hvr-imagecard__editable-tags"
@@ -71,7 +72,8 @@ export default {
   },
   data () {
     return {
-      tagOnTheFly: ''
+      tagOnTheFly: '',
+      sideRatio: null
     }
   },
   created () {
@@ -121,6 +123,15 @@ export default {
       query[FILTERING_TAG_QUERY_NAME] = [tag.text];
       this.$router.push({ query: query });
       this.$store.commit('setFiltering');
+    },
+    onImageLoaded () {
+      if (this.$refs.imageBela) {
+        console.log(this.$refs.imageBela.width, this.$refs.imageBela.height);
+        this.sideRatio = Math.round(this.$refs.imageBela.height / this.$refs.imageBela.width * 100) / 100;
+        this.imageData.sideRatio = this.sideRatio;
+      } else {
+        console.log('no img???', this.imageData);
+      }
     }
   }
 }

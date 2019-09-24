@@ -107,9 +107,7 @@ export default {
     },
     scrolledToBottom (isFooterVisible) {
       console.log('scrolledToBottom', isFooterVisible);
-      if (isFooterVisible) {
-        this.$store.commit('requestMoreImage', { increase: this.colCount * 3 });
-      }
+      this.$store.commit('requestMoreImage', { increase: this.colCount * 3 });
     },
     imageClicked (imageData) {
       this.shownImage = imageData;

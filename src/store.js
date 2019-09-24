@@ -4,7 +4,7 @@ import services from './services/Index';
 import _ from 'lodash';
 
 Vue.use(Vuex);
-const minDisplayImageCount = 4;
+const minDisplayImageCount = 12;
 const store = new Vuex.Store({
   state: {
     isWaiting: false,
@@ -79,9 +79,10 @@ const store = new Vuex.Store({
     },
     setUser (context, user) {
       context.commit('setUser', { user: user ? user.email : null });
-      services.onImagesSnapshot(querySnapshot => {
+      const throttledImageSnapshots = _.throttle((querySnapshot) => {
         context.dispatch('setImages', querySnapshot);
-      }, store.state.loggedUser);
+      }, 800);
+      services.onImagesSnapshot(throttledImageSnapshots, store.state.loggedUser);
     },
     setImages (context, querySnapshot) {
       const imagesPayload = querySnapshot.docs.map(doc => {

@@ -15,7 +15,9 @@ let imageSnapshotUnsubscribe = null;
 const saveOneImage = (file, index) => {
   const origFileName = file.name;
   const fileName = 'spg-' + (new Date()).getTime().toString() + '-' + index;
-  const filePath = `${imageStorageBasePath}/${fileName}`;
+  const extension = file.name.split('.').pop();
+
+  const filePath = `${imageStorageBasePath}/${fileName}.${extension}`;
 
   return storageRef.child(filePath).put(file)
       .then(() => {
@@ -24,7 +26,8 @@ const saveOneImage = (file, index) => {
             src: url,
             filePath: filePath,
             originalName: origFileName,
-            created: new Date().getTime()
+            created: new Date().getTime(),
+            sideRatio: file.sideRatio
           });
         });
       });
@@ -76,7 +79,6 @@ export default {
     return Promise.all(jobs);
   },
   onImagesSnapshot (listener, isAuthenticated) {
-    // TODO: implement some throtthle or debounce
     if (imageSnapshotUnsubscribe) {
       imageSnapshotUnsubscribe();
     }
