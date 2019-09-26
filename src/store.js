@@ -59,7 +59,6 @@ const store = new Vuex.Store({
       state.displayedImageList = state.filteredImageList.slice(0, minDisplayImageCount);
     },
     requestMoreImage (state, payload) {
-      console.log('more more more', payload.increase);
       state.displayedImageCount = Math.min(state.displayedImageCount + payload.increase, state.filteredImageList.length);
       state.displayedImageList = state.filteredImageList.slice(0, state.displayedImageCount);
     }

@@ -1,4 +1,5 @@
 @import "assets/styles/vars.less";
+@icon-diameter: 24px;
 
 .myhovercraft {
   .md-dialog-overlay {
@@ -12,6 +13,16 @@
     &--inactive {
       color: #999999;
     }
+  }
+
+  .md-button .md-icon.md-icon-font.hvr-icon-half::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: @icon-diameter solid fade(@white-color, 70%);
+    border-right: @icon-diameter solid transparent;
   }
 
   .md-button .md-icon.md-icon-font.hvr-icon-red {

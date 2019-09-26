@@ -22,8 +22,10 @@
     </div>
     <div class="hvr-gallery__bulk-actions" v-if="selectedItems.length">
       <div class="hvr-gallery__bulk-action-buttons">
-        <md-button class="md-icon-button">
-          <md-icon class="hvr-icon-blue">public</md-icon>
+        <md-button class="md-icon-button" @click="bulkTogglePublic">
+          <md-icon class="hvr-icon-blue" v-if="bulkPuplicState === bulkPublicStates.ALL">public</md-icon>
+          <md-icon v-if="bulkPuplicState === bulkPublicStates.MIXED">public</md-icon>
+          <md-icon class="hvr-icon-blue" v-if="bulkPuplicState === bulkPublicStates.NONE">vpn_lock</md-icon>
         </md-button>
         <md-button class="md-icon-button">
           <md-icon class="hvr-icon-blue">share</md-icon>
@@ -81,13 +83,33 @@ export default {
       showOnlyNonTagged: false,
       tag: '',
       bulkTag: '',
-      bulkAddingTags: []
+      bulkAddingTags: [],
+      bulkPublicStates: {
+        NONE: 'none',
+        ALL: 'all',
+        MIXED: 'mixed'
+      },
+      bulkPuplicState: null
     };
   },
   computed: {
     selectedItems: {
       get () {
-        const selection = this.fullList.filter(item => item.isSelected);
+        const selection = this.displayedImageList.filter(item => item.isSelected);
+        const containsPublic = selection.find(image => image.isPublic);
+        const containsPrivate = selection.find(image => !image.isPublic);
+
+        if( containsPublic && containsPrivate) {
+          this.bulkPuplicState = this.bulkPublicStates.MIXED;
+        }
+
+        if ( !containsPrivate ) {
+          this.bulkPuplicState = this.bulkPublicStates.ALL;
+        }
+
+        if ( !containsPublic ) {
+          this.bulkPuplicState = this.bulkPublicStates.NONE;
+        }
         return selection;
       },
       set (value) {
@@ -110,7 +132,10 @@ export default {
       displayedImageList: 'displayedImageList',
       allTags: 'existingTags',
       loggedUser: 'loggedUser'
-    })
+    }),
+    getPublicButtonClasses () {
+      return 'bela-jeno-joni';
+    }
   },
   methods: {
     tagFiltersUpdated (tags) {
@@ -139,6 +164,17 @@ export default {
         image.isSelected = false;
         return image;
       });
+    },
+    bulkTogglePublic () {
+      if(this.bulkPuplicState !== this.bulkPublicStates.ALL) {
+        this.bulkPuplicState = this.bulkPublicStates.ALL;
+      } else {
+        this.bulkPuplicState = this.bulkPublicStates.NONE;
+      }
+      this.selectedItems.forEach(image => {
+        image.isPublic = this.bulkPuplicState === this.bulkPublicStates.ALL;
+      })
+      this.$store.dispatch('updatePublicStateOnImages', {images: this.selectedItems});
     }
   }
 }
@@ -146,7 +182,7 @@ export default {
 <style lang="less">
   @import "../global.less";
   @search-height: 60px;
-  @header-box-shadow: #00000024 0 4px 4px 0;
+  @header-box-shadow: fade(@black-color, 15%) 0 4px 4px 0;
 
   .hvr-gallery {
     &__search {

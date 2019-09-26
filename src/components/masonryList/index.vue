@@ -95,7 +95,6 @@ export default {
         const shortesColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
         item.flatIndex = index;
         structured[shortesColumnIndex].push(item);
-        console.log(columnHeights, shortesColumnIndex);
         columnHeights[shortesColumnIndex] += item.sideRatio;
       });
 
@@ -108,7 +107,6 @@ export default {
   },
   methods: {
     scrolledToBottom (isFooterVisible) {
-      console.log('scrolledToBottom', isFooterVisible);
       this.$store.commit('requestMoreImage', { increase: this.colCount * 3 });
     },
     imageClicked (imageData) {
