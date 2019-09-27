@@ -30,6 +30,15 @@
         </form>
       </md-dialog-content>
     </md-dialog>
+    <md-dialog :md-active.sync="showConfirmDialog" v-if="showConfirmDialog">
+      <md-dialog-title><div v-html="confirmDialogData.title"></div></md-dialog-title>
+      <md-dialog-content>
+        <div class="hvr-confirm-dialog" >
+          <md-button class="md-raised md-accent" @click="applyConfirm">Sure</md-button>
+          <md-button class="md-raised" @click="cancelConfirm">Oh, no...</md-button>
+        </div>
+      </md-dialog-content>
+    </md-dialog>
   </div>
 </template>
 <script>
@@ -40,28 +49,56 @@ export default {
   created () {
     console.log('header created');
   },
+  mounted () {
+    this.$eventBus.$on('dialog:confirm', this.openConfirmDialog)
+  },
+  destroy () {
+    this.$eventBus.$off('dialog:confirm', this.openConfirmDialog);
+  },
   components: {
     FileSelector
   },
   data () {
     return {
       showLoginDialog: false,
+      // TODO: uniq dialog handling on the root
+      confirmDialogData: null,
       username: '',
       password: ''
     }
   },
   computed: {
+    showConfirmDialog: {
+      get () {
+        return !!this.confirmDialogData;
+      },
+      set (value) {
+        this.confirmDialogData = value;
+      }
+    },
     ...mapState({
       loggedUser: 'loggedUser'
     }),
     ...mapGetters(['totalCount', 'filteredCount'])
   },
   methods: {
+    cancelConfirm () {
+      this.showConfirmDialog = false;
+    },
+    applyConfirm () {
+      if (this.confirmDialogData && typeof  this.confirmDialogData.onConfirm === 'function') {
+        this.confirmDialogData.onConfirm();
+      }
+      this.showConfirmDialog = false;
+    },
     onFilesSelected (files) {
       this.$store.dispatch('addImages', files);
     },
     openLoginDialog () {
       this.showLoginDialog = true;
+    },
+    openConfirmDialog (payload) {
+      this.confirmDialogData = payload;
     },
     logUserIn () {
       this.$store.dispatch('login', {
@@ -112,5 +149,9 @@ export default {
       display: flex;
       justify-content: flex-end;
     }
+  }
+  .hvr-confirm-dialog {
+    display: flex;
+    justify-content: flex-end;
   }
 </style>

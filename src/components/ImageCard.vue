@@ -106,16 +106,24 @@ export default {
       });
     },
     tagIsToDeleted (payLoad) {
-      //TODO: wondering if we want a confirmation for preventing unwanted deletes by backspace
-      payLoad.deleteTag(payLoad.index);
-
-      this.$store.dispatch('removeTagFromImage', {
-        imageData: this.imageData,
-        tag: payLoad.tag
+      this.$eventBus.$emit('dialog:confirm', {
+        title: 'Do u want to remove the tag: <b><i>' + payLoad.tag.text + '</i></b>?',
+        onConfirm: () => {
+          payLoad.deleteTag(payLoad.index);
+          this.$store.dispatch('removeTagFromImage', {
+            imageData: this.imageData,
+            tag: payLoad.tag
+          });
+        }
       });
     },
     deleteImage () {
-      this.$store.dispatch('deleteImages', [this.imageData]);
+      this.$eventBus.$emit('dialog:confirm', {
+        title: 'Do u really want to remove this image?',
+        onConfirm: () => {
+          this.$store.dispatch('deleteImages', [this.imageData]);
+        }
+      });
     },
     filterOnTag(tag, event) {
       let query = {};
