@@ -23,9 +23,9 @@
     <div class="hvr-gallery__bulk-actions" v-if="selectedItems.length">
       <div class="hvr-gallery__bulk-action-buttons">
         <md-button class="md-icon-button" @click="bulkTogglePublic">
-          <md-icon class="hvr-icon-blue" v-if="bulkPuplicState === bulkPublicStates.ALL">public</md-icon>
-          <md-icon v-if="bulkPuplicState === bulkPublicStates.MIXED">public</md-icon>
-          <md-icon class="hvr-icon-blue" v-if="bulkPuplicState === bulkPublicStates.NONE">vpn_lock</md-icon>
+          <md-icon class="hvr-icon-blue" v-if="bulkPublicState === bulkPublicStates.ALL">public</md-icon>
+          <md-icon v-if="bulkPublicState === bulkPublicStates.MIXED">public</md-icon>
+          <md-icon class="hvr-icon-blue" v-if="bulkPublicState === bulkPublicStates.NONE">vpn_lock</md-icon>
         </md-button>
         <md-button class="md-icon-button">
           <md-icon class="hvr-icon-blue">share</md-icon>
@@ -55,9 +55,9 @@
         </md-button>
       </div>
     </div>
-    <MasonryList :items="displayedImageList" class="hvr-gallery__image-list">
+    <MasonryList :items="displayedImageListWithState" class="hvr-gallery__image-list">
       <template v-slot:list-item="slotProps" >
-        <ImageCard :imageData="slotProps.item"></ImageCard>
+        <ImageCard :imageData="slotProps.item" @selection-changed="onSelectionChanged($event)"></ImageCard>
       </template>
     </MasonryList>
   </div>
@@ -89,26 +89,29 @@ export default {
         ALL: 'all',
         MIXED: 'mixed'
       },
-      bulkPuplicState: null
+      bulkPublicState: null,
+      selectedItemIds: {}
     };
   },
   computed: {
     selectedItems: {
       get () {
-        const selection = this.displayedImageList.filter(item => item.isSelected);
+
+        const selection = this.displayedImageListWithState.filter(item => item.isSelected);
+
         const containsPublic = selection.find(image => image.isPublic);
         const containsPrivate = selection.find(image => !image.isPublic);
 
         if( containsPublic && containsPrivate) {
-          this.bulkPuplicState = this.bulkPublicStates.MIXED;
+          this.bulkPublicState = this.bulkPublicStates.MIXED;
         }
 
         if ( !containsPrivate ) {
-          this.bulkPuplicState = this.bulkPublicStates.ALL;
+          this.bulkPublicState = this.bulkPublicStates.ALL;
         }
 
         if ( !containsPublic ) {
-          this.bulkPuplicState = this.bulkPublicStates.NONE;
+          this.bulkPublicState = this.bulkPublicStates.NONE;
         }
         return selection;
       },
@@ -126,18 +129,25 @@ export default {
     activeFilteringTags () {
       return this.$store.getters.tagObjectsFromFilter;
     },
+    displayedImageListWithState () {
+      return this.$store.state.displayedImageList.map(image => {
+        if (this.selectedItemIds[image.id]) {
+          image.isSelected = true;
+        }
+        return image;
+      });
+    },
     ...mapState({
       fullList: 'fullImageList',
-      filteredImageList: 'filteredImageList',
-      displayedImageList: 'displayedImageList',
       allTags: 'existingTags',
       loggedUser: 'loggedUser'
-    }),
-    getPublicButtonClasses () {
-      return 'bela-jeno-joni';
-    }
+    })
   },
   methods: {
+    onSelectionChanged ($event) {
+      this.selectedItemIds[$event.id] = $event.isSelected;
+      this.$store.state.displayedImageList = JSON.parse(JSON.stringify(this.$store.state.displayedImageList));
+    },
     tagFiltersUpdated (tags) {
       let query = {};
       query[FILTERING_TAG_QUERY_NAME] = tags.map(tag => tag.text);
@@ -160,21 +170,33 @@ export default {
       return this.allTags.filter(tag => tag.text.toLowerCase().indexOf(input.toLowerCase()) !== -1);
     },
     clearSelection () {
+      this.selectedItemIds = {};
       this.selectedItems = this.selectedItems.map(image => {
         image.isSelected = false;
         return image;
       });
+      this.$store.state.displayedImageList = JSON.parse(JSON.stringify(this.$store.state.displayedImageList));
     },
     bulkTogglePublic () {
-      if(this.bulkPuplicState !== this.bulkPublicStates.ALL) {
-        this.bulkPuplicState = this.bulkPublicStates.ALL;
+      if(this.bulkPublicState !== this.bulkPublicStates.ALL) {
+        this.bulkPublicState = this.bulkPublicStates.ALL;
       } else {
-        this.bulkPuplicState = this.bulkPublicStates.NONE;
+        this.bulkPublicState = this.bulkPublicStates.NONE;
       }
-      this.selectedItems.forEach(image => {
-        image.isPublic = this.bulkPuplicState === this.bulkPublicStates.ALL;
-      })
-      this.$store.dispatch('updatePublicStateOnImages', {images: this.selectedItems});
+      const clonedImages = JSON.parse(JSON.stringify(this.selectedItems)).map(image => {
+        image.isPublic = this.bulkPublicState === this.bulkPublicStates.ALL;
+        return image;
+      });
+      this.$store.dispatch('updatePublicStateOnImages', {images: clonedImages});
+    }
+  },
+  watchers: {
+    '$route.params.search': {
+      handler: function(search) {
+        console.log(search)
+      },
+      deep: true,
+      immediate: true
     }
   }
 }

@@ -12,10 +12,11 @@ const store = new Vuex.Store({
     fullImageList: [],
     filteredImageList: [],
     displayedImageList: [],
-    displayedImageCount: 3,
+    displayedImageCount: minDisplayImageCount,
     filteringTags: [],
     listOnlyTagless: false,
-    existingTags: []
+    existingTags: [],
+    imagesSnapshotByIds: {}
   },
   mutations: {
     updateImageList (state, payload) {
@@ -30,11 +31,28 @@ const store = new Vuex.Store({
     setUser (state, payload) {
       state.loggedUser = payload.user;
     },
+    saveImageListSnapshot (state, payload) {
+      state.imagesSnapshotByIds = {count: state.filteredImageList.length};
+      // TODO: we need to save the whole snapshot only in case of sorting?
+      /*
+      const prevFilteredList = JSON.parse(JSON.stringify(state.filteredImageList));
+      if (prevFilteredList.length) {
+        delete prevFilteredList[0].flatIndex;
+        state.imagesSnapshotByIds[prevFilteredList[0].id] = prevFilteredList[0];
+        state.imagesSnapshotByIds = prevFilteredList.reduce((byIds, image) => {
+          delete image.flatIndex;
+          byIds[image.id] = image;
+          return byIds;
+        }, state.imagesSnapshotByIds);
+      }
+      */
+    },
     setFiltering (state, payload) {
       let tagFilters = state.route.query[FILTERING_TAG_QUERY_NAME];
       if (!tagFilters) {
         tagFilters = [];
       }
+
       if (typeof tagFilters === 'string') {
         tagFilters = [tagFilters]
       }
@@ -56,9 +74,11 @@ const store = new Vuex.Store({
           return true;
         });
       }
-      state.displayedImageList = state.filteredImageList.slice(0, minDisplayImageCount);
+
+      state.displayedImageList = state.filteredImageList.slice(0, state.displayedImageCount || minDisplayImageCount);
     },
     requestMoreImage (state, payload) {
+      console.log('requestMoreImage');
       state.displayedImageCount = Math.min(state.displayedImageCount + payload.increase, state.filteredImageList.length);
       state.displayedImageList = state.filteredImageList.slice(0, state.displayedImageCount);
     }
@@ -92,6 +112,7 @@ const store = new Vuex.Store({
           ...data
         };
       });
+      console.log('setImages');
       context.commit('updateImageList', imagesPayload);
       context.commit('setFiltering');
     },
@@ -194,6 +215,7 @@ const store = new Vuex.Store({
       // TODO: should set only specific fields and never save local stored objects as they are
     },
     updatePublicStateOnImages (context, payload) {
+      context.commit('saveImageListSnapshot');
       services.updatePublicStateOnImages(payload.images)
         .catch(err => {
           console.error(err);
@@ -205,6 +227,7 @@ const store = new Vuex.Store({
     filteredCount: state => state.filteredImageList.length,
     displayedCount: state => state.displayedImageList.length,
     tagObjectsFromFilter: state => {
+      console.log('query changed:::');
       if (!state.route.query[FILTERING_TAG_QUERY_NAME]) {
         return [];
       }
@@ -227,6 +250,9 @@ services.onTagsSnapshot(querySnapshot => {
 });
 services.onUserStateSnapshot(user => {
   store.dispatch('setUser', user);
+});
+window.addEventListener('popstate', () => {
+  console.log('query changed');
 });
 export default store;
 export const FILTERING_TAG_QUERY_NAME = 'tagfilters';

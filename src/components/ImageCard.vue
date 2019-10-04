@@ -13,7 +13,7 @@
       <md-button class="md-icon-button">
         <md-icon class="hvr-icon-blue">share</md-icon>
       </md-button>
-      <md-button class="md-icon-button">
+      <md-button class="md-icon-button" :href="imageData.src" target="_blank" :download="imageData.originalName" type="image/jpeg">
         <md-icon class="hvr-icon-blue">get_app</md-icon>
       </md-button>
       <md-button class="md-icon-button">
@@ -23,6 +23,7 @@
         <md-button class="md-icon-button" @click.stop.prevent="deleteImage">
           <md-icon class="hvr-icon-red">delete</md-icon>
         </md-button>
+        <span style="position: relative;">-{{imageData.isSelected}}-</span>
       </span>
     </div>
     <vue-tags-input
@@ -48,7 +49,7 @@
       >#{{tag.text}}</span>
     </div>
     <span class="hvr-imagecard__checkbox" v-if="loggedUser">
-        <md-checkbox v-model="imageData.isSelected"></md-checkbox>
+        <md-checkbox v-model="imageData.isSelected" @change="selectedStateChanged"></md-checkbox>
     </span>
   </div>
 </template>
@@ -64,9 +65,6 @@ export default {
   props: {
     imageData: {
       type: Object
-    },
-    isSelected: {
-      type: Boolean
     }
   },
   data () {
@@ -78,6 +76,9 @@ export default {
   created () {
     console.log('imageCard created');
   },
+  mounted () {
+    console.log('imageCard mounted');
+  },
   computed: {
     tagsForAutoComplete () {
       const filtered = this.existingTags.filter(({ text }) => {
@@ -88,14 +89,21 @@ export default {
     ...mapState(['existingTags', 'loggedUser'])
   },
   methods: {
+    selectedStateChanged () {
+      console.log('selected changed', this.imageData.isSelected);
+      this.$emit('selection-changed', {
+        isSelected: this.imageData.isSelected,
+        id: this.imageData.id
+      });
+    },
     imageClicked () {
       this.$eventBus.$emit('imageCard:open', this.imageData);
     },
     togglePublicity () {
-      this.imageData.isPublic = !this.imageData.isPublic;
-      console.log('p', this.imageData.isPublic);
+      const clonedImage = JSON.parse(JSON.stringify(this.imageData));
+      clonedImage.isPublic = !clonedImage.isPublic;
       this.$store.dispatch('updatePublicStateOnImages', {
-        images: [ this.imageData ]
+        images: [ clonedImage ]
       });
     },
     tagIsToAdded (payLoad) {

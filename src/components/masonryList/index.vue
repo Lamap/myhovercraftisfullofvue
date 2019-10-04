@@ -83,6 +83,9 @@ export default {
       return 'hvr-imagelist__col--split-' + this.colCount;
     },
     structuredItems () {
+      if (!this.items) {
+        return [];
+      }
       const structured = [];
       const columnHeights = [];
 
