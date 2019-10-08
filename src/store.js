@@ -75,6 +75,11 @@ const store = new Vuex.Store({
         });
       }
 
+      if (state.filteredImageList.length < minDisplayImageCount) {
+        state.displayedImageCount = state.filteredImageList.length;
+      } else {
+        state.displayedImageCount = minDisplayImageCount;
+      }
       state.displayedImageList = state.filteredImageList.slice(0, state.displayedImageCount || minDisplayImageCount);
     },
     requestMoreImage (state, payload) {
@@ -227,20 +232,21 @@ const store = new Vuex.Store({
     filteredCount: state => state.filteredImageList.length,
     displayedCount: state => state.displayedImageList.length,
     tagObjectsFromFilter: state => {
-      console.log('query changed:::');
-      if (!state.route.query[FILTERING_TAG_QUERY_NAME]) {
-        return [];
-      }
+
+      let query = [];
       if (typeof state.route.query[FILTERING_TAG_QUERY_NAME] === 'string') {
-        return [{
+        query = [{
           text: state.route.query[FILTERING_TAG_QUERY_NAME]
-        }]
+        }];
       }
-      return state.route.query[FILTERING_TAG_QUERY_NAME].map(tag => {
-        return {
-          text: tag
-        };
-      });
+      if (state.route.query[FILTERING_TAG_QUERY_NAME] instanceof Array) {
+        query = state.route.query[FILTERING_TAG_QUERY_NAME].map(tag => {
+          return {
+            text: tag
+          };
+        });
+      }
+      return query;
     }
   }
 });
@@ -252,7 +258,7 @@ services.onUserStateSnapshot(user => {
   store.dispatch('setUser', user);
 });
 window.addEventListener('popstate', () => {
-  console.log('query changed');
+  console.log('popstate:', store.state.route.query[0]);
 });
 export default store;
 export const FILTERING_TAG_QUERY_NAME = 'tagfilters';

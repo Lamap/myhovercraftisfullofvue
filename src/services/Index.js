@@ -70,7 +70,7 @@ export default {
     });
   },
   updateTagsOnImage(imageData) {
-    return imageCollection.doc(imageData.id).set({ tags: imageData.tags }, { merge: true });
+    return imageCollection.doc(imageData.id).set({ tags: imageData.tags }, { merge: true }).then(res => console.log(res));
   },
   updatePublicStateOnImages(images) {
     const jobs = images.map(image => {
@@ -79,6 +79,7 @@ export default {
     return Promise.all(jobs);
   },
   onImagesSnapshot (listener, isAuthenticated) {
+
     if (imageSnapshotUnsubscribe) {
       imageSnapshotUnsubscribe();
     }
@@ -91,9 +92,17 @@ export default {
     if (imageSnapshotUnsubscribe) {
       imageSnapshotUnsubscribe();
     }
+
     imageSnapshotUnsubscribe = imageStream.onSnapshot((querySnapshot) => {
+      console.log('imagesSnapshot:', querySnapshot);
       listener(querySnapshot);
     });
+    /*
+    imageStream.get().then(querySnapshot => {
+      console.log(querySnapshot);
+      listener(querySnapshot);
+    });
+    */
   },
   onTagsSnapshot (listener) {
     // TODO: implement some throtthle or debounce

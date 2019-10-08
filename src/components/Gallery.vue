@@ -2,6 +2,7 @@
   <div class="hvr-gallery">
     <div class="hvr-gallery__search">
       <span class="hvr-gallery__search-label">Search</span>
+      <span style="display: none">{{filterTagsFromQuery}}</span>
       <vue-tags-input
           class="hvr-gallery__search-tags-input"
           v-model="tag"
@@ -137,6 +138,11 @@ export default {
         return image;
       });
     },
+    /// TODO: remove this hack, figure out why does not work the simple watch or how else can we listen to route change?
+    filterTagsFromQuery () {
+      this.$store.commit('setFiltering');
+      return this.$store.state.route.query;
+    },
     ...mapState({
       fullList: 'fullImageList',
       allTags: 'existingTags',
@@ -152,7 +158,6 @@ export default {
       let query = {};
       query[FILTERING_TAG_QUERY_NAME] = tags.map(tag => tag.text);
       this.$router.push({ query: query });
-      this.$store.commit('setFiltering');
     },
     showOnlyTaglessChanged (value) {
       this.$store.commit('setFiltering', {
@@ -188,15 +193,6 @@ export default {
         return image;
       });
       this.$store.dispatch('updatePublicStateOnImages', {images: clonedImages});
-    }
-  },
-  watchers: {
-    '$route.params.search': {
-      handler: function(search) {
-        console.log(search)
-      },
-      deep: true,
-      immediate: true
     }
   }
 }

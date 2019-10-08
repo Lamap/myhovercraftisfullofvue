@@ -137,7 +137,6 @@ export default {
       let query = {};
       query[FILTERING_TAG_QUERY_NAME] = [tag.text];
       this.$router.push({ query: query });
-      this.$store.commit('setFiltering');
     }
   }
 }
