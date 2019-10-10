@@ -158,6 +158,7 @@ export default {
       let query = {};
       query[FILTERING_TAG_QUERY_NAME] = tags.map(tag => tag.text);
       this.$router.push({ query: query });
+      window.scrollTo(0, 0);
     },
     showOnlyTaglessChanged (value) {
       this.$store.commit('setFiltering', {

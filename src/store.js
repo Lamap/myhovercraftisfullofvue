@@ -78,7 +78,7 @@ const store = new Vuex.Store({
       if (state.filteredImageList.length < minDisplayImageCount) {
         state.displayedImageCount = state.filteredImageList.length;
       } else {
-        state.displayedImageCount = minDisplayImageCount;
+        state.displayedImageCount = Math.max(minDisplayImageCount, state.displayedImageCount);
       }
       state.displayedImageList = state.filteredImageList.slice(0, state.displayedImageCount || minDisplayImageCount);
     },
