@@ -23,7 +23,6 @@
         <md-button class="md-icon-button" @click.stop.prevent="deleteImage">
           <md-icon class="hvr-icon-red">delete</md-icon>
         </md-button>
-        <span style="position: relative;">-{{imageData.isSelected}}-</span>
       </span>
     </div>
     <vue-tags-input

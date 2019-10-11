@@ -50,8 +50,9 @@ const store = new Vuex.Store({
       }
       */
     },
-    setFiltering (state, payload) {
+    setFiltering (state) {
       let tagFilters = state.route.query[FILTERING_TAG_QUERY_NAME];
+      const onlyTagless =  state.route.query[TAGLESS_QUERY_NAME];
       if (!tagFilters) {
         tagFilters = [];
       }
@@ -60,7 +61,7 @@ const store = new Vuex.Store({
         tagFilters = [tagFilters]
       }
 
-      if (payload && payload.onlyNontagged) {
+      if (onlyTagless) {
         state.filteredImageList = state.fullImageList.filter(image => !image.tags.length);
       } else if (!tagFilters.length){
         state.filteredImageList = state.fullImageList;
@@ -267,3 +268,4 @@ window.addEventListener('popstate', () => {
 });
 export default store;
 export const FILTERING_TAG_QUERY_NAME = 'tagfilters';
+export const TAGLESS_QUERY_NAME = 'tagless';

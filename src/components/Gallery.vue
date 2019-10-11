@@ -17,7 +17,7 @@
         <span class="hvr-gallery__non-tagged-filter-sub">or</span>
         show only non-tagged
         <span class="hvr-gallery__non-tagged-filter-checkbox">
-          <md-checkbox v-model="showOnlyNonTagged" @change="showOnlyTaglessChanged"></md-checkbox>
+          <md-checkbox v-model="showOnlyNonTagged" ></md-checkbox>
         </span>
       </span>
     </div>
@@ -72,7 +72,7 @@ import MasonryList from '@/components/masonryList';
 import ImageCard from '@/components/ImageCard.vue';
 import VueTagsInput from '@johmun/vue-tags-input';
 import { mapState } from 'vuex';
-import { FILTERING_TAG_QUERY_NAME } from '../store';
+import { FILTERING_TAG_QUERY_NAME, TAGLESS_QUERY_NAME } from '../store';
 
 export default {
   components: {
@@ -85,7 +85,6 @@ export default {
   },
   data () {
     return {
-      showOnlyNonTagged: false,
       tag: '',
       bulkTag: '',
       bulkAddingTags: [],
@@ -147,6 +146,18 @@ export default {
       this.$store.commit('setFiltering');
       return this.$store.state.route.query;
     },
+    showOnlyNonTagged: {
+      set (value) {
+        const query = JSON.parse(JSON.stringify(this.$route.query));
+        query[TAGLESS_QUERY_NAME] = Number(value);
+        this.$router.push({ query: query });
+        window.scrollTo(0, 0);
+      },
+      get () {
+        const value = Boolean(Number(this.$store.state.route.query[TAGLESS_QUERY_NAME]));
+        return value;
+      }
+    },
     ...mapState({
       filteredList: 'filteredImageList',
       fullList: 'fullImageList',
@@ -165,11 +176,6 @@ export default {
       query[FILTERING_TAG_QUERY_NAME] = tags.map(tag => tag.text);
       this.$router.push({ query: query });
       window.scrollTo(0, 0);
-    },
-    showOnlyTaglessChanged (value) {
-      this.$store.commit('setFiltering', {
-        onlyNontagged: value
-      })
     },
     addBulkTags () {
       if (!this.bulkAddingTags.length) {
