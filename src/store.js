@@ -7,7 +7,7 @@ Vue.use(Vuex);
 const minDisplayImageCount = 14;
 const store = new Vuex.Store({
   state: {
-    isWaiting: false,
+    isBusy: true,
     loggedUser: null,
     fullImageList: [],
     filteredImageList: [],
@@ -30,6 +30,9 @@ const store = new Vuex.Store({
     },
     setUser (state, payload) {
       state.loggedUser = payload.user;
+    },
+    setBusy(state, payload) {
+      state.isBusy = payload;
     },
     saveImageListSnapshot (state, payload) {
       state.imagesSnapshotByIds = {count: state.filteredImageList.length};
@@ -120,6 +123,7 @@ const store = new Vuex.Store({
       console.log('setImages');
       context.commit('updateImageList', imagesPayload);
       context.commit('setFiltering');
+      context.commit('setBusy', false)
     },
     setTags (context, querySnapshot) {
       const tagsPayload = querySnapshot.docs.map(doc => {
@@ -255,6 +259,7 @@ services.onTagsSnapshot(querySnapshot => {
   store.dispatch('setTags', querySnapshot);
 });
 services.onUserStateSnapshot(user => {
+  store.commit('setBusy', true);
   store.dispatch('setUser', user);
 });
 window.addEventListener('popstate', () => {

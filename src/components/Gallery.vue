@@ -61,6 +61,10 @@
         <ImageCard :imageData="slotProps.item" @selection-changed="onSelectionChanged($event)"></ImageCard>
       </template>
     </MasonryList>
+    <div class="hvr-gallery__empty-list" v-if="!filteredList.length && !isBusy">
+      <div class="hvr-gallery__empty-list-text">Ups,...found nothing.</div>
+      <img alt="Vue logo" src="../assets/minion.svg" class="hvr-gallery__empty-list-image">
+    </div>
   </div>
 </template>
 <script>
@@ -144,9 +148,11 @@ export default {
       return this.$store.state.route.query;
     },
     ...mapState({
+      filteredList: 'filteredImageList',
       fullList: 'fullImageList',
       allTags: 'existingTags',
-      loggedUser: 'loggedUser'
+      loggedUser: 'loggedUser',
+      isBusy: 'isBusy'
     })
   },
   methods: {
@@ -277,6 +283,21 @@ export default {
     }
     &__image-list {
       padding: 0 @main-horizontal-spacing;
+    }
+    &__empty-list {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100%;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+      background-color: @white-color;
+      font-size: 30px;
+    }
+    &__empty-list-image {
+      width: 250px;
+      margin-top: 30px;
     }
   }
 </style>
