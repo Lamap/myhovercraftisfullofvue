@@ -230,6 +230,18 @@ const store = new Vuex.Store({
         .catch(err => {
           console.error(err);
         });
+    },
+    deleteTag (context, payload) {
+      services.deleteNonUsedTag(payload)
+        .catch(err => {
+          console.error(err);
+        });
+    },
+    renameTag (context, payload) {
+      services.renameTag(payload)
+        .catch(err => {
+          console.error(err);
+        });
     }
   },
   getters: {

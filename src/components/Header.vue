@@ -5,7 +5,7 @@
     <span class="hvr-header__count">{{totalCount}}</span>
     eels
 
-    <file-selector @filesSelected="onFilesSelected" v-if="loggedUser"/>
+    <file-selector @filesSelected="onFilesSelected" v-if="loggedUser && showAddButton"/>
     <span class="hvr-header__login-section" >
       <md-button class="md-icon-button" v-if="!loggedUser" @click="openLoginDialog">
         <md-icon>account_circle</md-icon>
@@ -46,6 +46,12 @@ import FileSelector from '@/components/FileSelector';
 import { mapState, mapGetters } from 'vuex';
 
 export default {
+  props: {
+    showAddButton: {
+      default: true,
+      type: Boolean
+    }
+  },
   created () {
     console.log('header created');
   },

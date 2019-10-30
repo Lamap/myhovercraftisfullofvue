@@ -45,7 +45,11 @@ const deleteOneImage = (image) => {
 
 const updatePublicStateOnOneImage = (imageData) => {
   return imageCollection.doc(imageData.id).set({ isPublic: imageData.isPublic }, { merge: true });
-}
+};
+
+const updateTagOnImage = (imageId, updatedTagsArray) => {
+  return imageCollection.doc(imageId).set({tags: updatedTagsArray}, { merge: true });
+};
 
 export default {
   addImages (files) {
@@ -68,6 +72,24 @@ export default {
       docRef.text = tagValue;
       return docRef;
     });
+  },
+  deleteNonUsedTag (tag) {
+    return tagCollection.doc(tag.id).delete();
+  },
+  renameTag (tagToUpdate) {
+    return tagCollection.doc(tagToUpdate.id).set({text: tagToUpdate.text})
+      .then(() => {
+        const imageUpdateJobs = tagToUpdate.images.map(image => {
+          const newTagsArray = image.tags.map(tag => {
+            if (tag.id === tagToUpdate.id) {
+              tag.text = tagToUpdate.text;
+            }
+            return tag;
+          })
+          return updateTagOnImage(image.id, newTagsArray);
+        });
+        return Promise.all(imageUpdateJobs);
+      });
   },
   updateTagsOnImage(imageData) {
     return imageCollection.doc(imageData.id).set({ tags: imageData.tags }, { merge: true }).then(res => console.log(res));

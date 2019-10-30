@@ -77,6 +77,9 @@ export default {
   },
   computed: {
     colCount () {
+      if (!this.containerWidth) {
+        return 3;
+      }
       return Math.floor(this.containerWidth / this.baseColWidth);
     },
     colClass () {
