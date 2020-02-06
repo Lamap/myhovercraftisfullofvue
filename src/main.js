@@ -7,6 +7,7 @@ import { sync } from 'vuex-router-sync'
 import 'vue-material/dist/vue-material.min.css';
 import 'vue-material/dist/theme/default.css';
 import VueObserveVisibility from 'vue-observe-visibility';
+import VueTouch from 'vue-touch';
 
 const unsync = sync(store, router);
 Vue.prototype.$eventBus = new Vue();
@@ -24,6 +25,7 @@ Vue.use(MdTable);
 Vue.use(MdContent);
 Vue.use(MdRipple);
 Vue.use(VueObserveVisibility);
+Vue.use(VueTouch);
 
 const app = new Vue({
   router,

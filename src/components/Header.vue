@@ -125,7 +125,7 @@ export default {
   .hvr-header {
     color: @mid-grey-color;
     font-weight: lighter;
-    font-size: 23px;
+    font-size: 4vw;
     text-transform: uppercase;
     display: flex;
     position: sticky;

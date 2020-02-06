@@ -20,7 +20,7 @@
     </div>
     <div class="hvr-imagelist__bottom-observer" v-observe-visibility="{callback: scrolledToBottom, throttle: 600}"></div>
     <div>
-      <md-dialog :md-active.sync="showImagePopup">
+      <md-dialog :md-active.sync="showImagePopup" @click="closeDialog">
         <md-dialog-content>
           <div class="hvr-image-popup">
             <img v-if="shownImage" :src="shownImage.src" class="hvr-image-popup__image md-image"/>
@@ -30,6 +30,9 @@
             <div class="hvr-image-popup__right" @click="stepRight">
               <md-icon class="md-size-4x">chevron_right</md-icon>
             </div>
+            <v-touch @swipeleft="stepLeft" @swiperight="stepRight">
+              <div class="hvr-image-popup__mobile-frontdrop"></div>
+            </v-touch>
           </div>
         </md-dialog-content>
       </md-dialog>
@@ -132,6 +135,9 @@ export default {
       } else {
         this.shownImage = this.items.find(item => item.flatIndex === this.shownImage.flatIndex + 1);
       }
+    },
+    closeDialog () {
+      this.showImagePopup = false;
     }
   }
 }
@@ -227,6 +233,26 @@ export default {
 
     &__image {
       max-height: @max-image-popup-height;
+    }
+
+    &__mobile-frontdrop {
+      display: none;
+    }
+
+    @media screen and (max-width: 600px) {
+      &__left,
+      &__right {
+        display: block;
+      }
+
+      &__mobile-frontdrop {
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+      }
     }
   }
 </style>
