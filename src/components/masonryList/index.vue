@@ -20,7 +20,7 @@
     </div>
     <div class="hvr-imagelist__bottom-observer" v-observe-visibility="{callback: scrolledToBottom, throttle: 600}"></div>
     <div>
-      <md-dialog :md-active.sync="showImagePopup" @click="closeDialog">
+      <md-dialog :md-active.sync="showImagePopup">
         <md-dialog-content>
           <div class="hvr-image-popup">
             <img v-if="shownImage" :src="shownImage.src" class="hvr-image-popup__image md-image"/>
@@ -31,7 +31,7 @@
               <md-icon class="md-size-4x">chevron_right</md-icon>
             </div>
             <v-touch @swipeleft="stepLeft" @swiperight="stepRight">
-              <div class="hvr-image-popup__mobile-frontdrop"></div>
+              <div class="hvr-image-popup__mobile-frontdrop" @click="closeDialog"></div>
             </v-touch>
           </div>
         </md-dialog-content>
