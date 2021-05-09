@@ -13,7 +13,7 @@
     "@johmun/vue-tags-input": "^2.1.0",
     "core-js": "^2.6.5",
     "firebase": "^6.3.3",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "vue": "^2.6.10",
     "vue-material": "^1.0.0-beta-11",
     "vue-observe-visibility": "^0.4.4",
